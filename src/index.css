@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "poppins", "sans-serif";
+  overflow-y: auto;
+}
+
+.wrap {
+  -ms-word-break: break-all;
+  word-wrap: anywhere;
+  word-break: break-all;
+}
+
+.scale-in {
+  animation: scaleIn 600ms;
+}
+
+.videos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+}
+
+.video-player {
+  width: 100%;
+  overflow: hidden;
+}
+
+.loader {
+  animation: load 0.3s linear infinite;
+}
+
+@keyframes load {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.7);
+  }
+  to {
+    transfrom: scale(1);
+  }
+}
+
+.slide-in {
+  transition: 110ms ease-in;
+  animation: slide 600ms;
+}
+
+@keyframes slide {
+  from {
+    transform: scale(0);
+    transform-origin: left;
+  }
+  to {
+    transfrom: scale(1);
+    transform-origin: left;
+  }
+}
+
+.slide {
+  animation: slide 600ms;
+}
+
+@keyframes slide {
+  from {
+    transform: scale(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scale(1);
+    transform-origin: left;
+  }
+}
+
+.info-slide {
+  animation: infoSlide 700ms ease-in-out;
+}
+
+@keyframes infoSlide {
+  0% {
+    transform: translateX(100%);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateX(-10%);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.sidebar-slide-in {
+  animation: sidebarSlideIn 500ms ease-in-out;
+}
+
+@keyframes sidebarSlideIn {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.video-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 1200px) {
+  .show-sidebar {
+    transform: translateX(0);
+    position: fixed;
+    top: 0;
+    z-index: 600;
+    transition: 600ms;
+  }
+  .hide-sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    top: 0;
+    z-index: 600;
+    transition: 600ms;
+    flex: none;
+  }
+  .show-nav {
+    display: block;
+  }
+}
+@media (max-width: 900px) {
+  .profile-container {
+    height: 100vh;
+  }
+}
+
+@media (max-width: 850px) {
+  .video-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .room-container {
+    flex-wrap: wrap;
+  }
+  .chat-bar {
+    width: 100%;
+    flex: none;
+    position: fixed;
+    display: block;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .show-mobile-chat {
+    transform: translateX(0);
+    transition: 600ms;
+  }
+  .hide-mobile-chat {
+    transform: translateX(100%);
+    transition: 600ms;
+  }
+  .chat-icon {
+    display: block;
+  }
+  .chat-close-btn {
+    display: block;
+  }
+  .video-wrapper {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .mobile-max-width {
+    width: 80%;
+    margin: 0 auto;
+  }
+}
+@media (max-width: 500px) {
+  .mobile-max-width {
+    width: 80%;
+    margin: 0 auto;
+  }
+  .video-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 500px) {
+  .profile-width {
+    width: 90%;
+  }
+}
+
+@media (max-width: 320px) {
+  .profile-btn {
+    font-size: 13px;
+    padding: 0 0.5rem;
+    height: 35px;
+  }
+  .profile-logout {
+    font-size: 15px;
+    padding: 0 0.7rem;
+  }
+}
+
+@media (max-width: 270px) {
+  .profile-change {
+    font-size: 12px;
+    padding: 0 0.5rem;
+    height: 30px;
+  }
+  .profile-text {
+    font-size: 12px;
+  }
+  .profile-text-value {
+    font-size: 10px;
+  }
+  .account-img {
+    height: 4rem;
+    width: 4rem;
+  }
+  .account-header {
+    font-size: 1.2rem;
+  }
+  .profile-save-btn {
+    font-size: 12px;
+    padding: 0 0.5rem;
+    height: 30px;
+    width: 80px;
+  }
+  .profile-input {
+    height: 30px;
+    font-size: 13px;
+    padding: 0 0.5rem;
+  }
+  .alert {
+    right: 0.5rem;
+    left: 0.5rem;
+    padding: 0 1rem;
+    height: 40px;
+  }
+  .profile-container {
+    height: 100vh;
+  }
+}
