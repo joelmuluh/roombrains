@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getStream } from "../functions/getStream";
-import { socket } from "../socket/socketConnection";
 
 function Invitation({
   roomData,
@@ -15,9 +14,8 @@ function Invitation({
 }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const meeting = useSelector((state) => state.meeting);
-  const streams = useSelector((state) => state.streams);
-  const peer = meeting.peer;
+  const streamsData = useSelector((state) => state.streams);
+  const socket = useSelector((state) => state.streams.socket);
   const firstName = user.username.includes(" ")
     ? user.username.split(" ")[1]
     : user.username;
@@ -47,10 +45,8 @@ function Invitation({
     socket.emit("invitation-accepted", {
       conversationId,
       username: user.username,
-      userId: user._id,
+      _id: user._id,
     });
-    // setShowMobileChat(false);
-    // navigate("/");
   };
 
   return (

@@ -49,21 +49,26 @@ export const streamReducer = (state = initialState, action) => {
       }
 
     case "ADD_STREAMER":
-      const allStreamers = state.streamers.find(
+      const streamers = state.streamers.find(
         (stream) => stream.conversationId === action.payload.conversationId
       );
-      if (allStreamers) {
+      if (streamers) {
         if (
-          allStreamers?.myStreamers.length < 5 &&
-          !allStreamers?.myStreamers.includes(action.payload._id)
+          streamers?.myStreamers.length <= 3 &&
+          !streamers?.myStreamers.includes(action.payload._id)
         ) {
+          const myStreamers = streamers.myStreamers;
+          const newStreamerArray = state.streamers.filter(
+            (streamer) =>
+              streamer.conversationId !== action.payload.conversationId
+          );
           return {
             ...state,
             streamers: [
-              ...state.streamers,
+              newStreamerArray,
               {
                 conversationId: action.payload.conversationId,
-                myStreamers: [...allStreamers?.myStreamers, action.payload._id],
+                myStreamers: [...myStreamers, action.payload._id],
               },
             ],
           };
@@ -85,52 +90,36 @@ export const streamReducer = (state = initialState, action) => {
       const theStreamers = state.streamers.find(
         (streamer) => streamer.conversationId === action.payload.conversationId
       );
-      const newStreamers = theStreamers.myStreamers.filter(
-        (streamer) => streamer !== action.payload._id
-      );
+      if (theStreamers) {
+        const newStreamers = theStreamers.myStreamers.filter(
+          (streamer) => streamer !== action.payload._id
+        );
+        const newStreamerArray = state.streamers.filter(
+          (streamer) =>
+            streamer.conversationId !== action.payload.conversationId
+        );
 
+        return {
+          ...state,
+          streamers: [
+            newStreamerArray,
+            {
+              conversationId: action.payload.conversationId,
+              myStreamers: newStreamers,
+            },
+          ],
+        };
+      } else return state;
+
+    case "INITIAL_STREAMERS":
       return {
         ...state,
         streamers: [
           ...state.streamers,
-          {
-            conversationId: action.payload.conversationId,
-            myStreamers: newStreamers,
-          },
+          { conversationId: action.payload, myStreamers: [] },
         ],
       };
 
-    case "ADD_PARTICIPANT":
-      const participation = state.participation.find(
-        (participant) =>
-          participant.conversationId === action.payload.conversationId
-      );
-      if (participation) {
-        return {
-          ...state,
-          participation: [
-            ...state.participation,
-            {
-              conversationId: action.payload.conversationId,
-              participants: [
-                ...participation?.participants,
-                action.payload._id,
-              ],
-            },
-          ],
-        };
-      } else {
-        return {
-          ...state,
-          participation: [
-            ...state.participation,
-            {
-              conversationId: action.payload.conversationId,
-              participants: [action.payload._id],
-            },
-          ],
-        };
-      }
     case "INITIAL_STREAMING_STATE":
       return {
         ...state,
@@ -161,6 +150,56 @@ export const streamReducer = (state = initialState, action) => {
           { conversationId: action.payload, value: false },
         ],
       };
+    case "MUTE_USER":
+      const userStream = state.streams.find(
+        (stream) =>
+          stream.conversationId === action.payload.conversationId &&
+          stream._id === action.payload._id
+      );
+      userStream.stream.getTracks().forEach((track) => {
+        if (track.kind === "audio") {
+          track.enabled = false;
+        }
+      });
+
+      return state;
+    case "UNMUTE_USER":
+      const stream = state.streams.find(
+        (stream) =>
+          stream.conversationId === action.payload.conversationId &&
+          stream._id === action.payload._id
+      );
+      stream.stream.getTracks().forEach((track) => {
+        if (track.kind === "audio") {
+          track.enabled = true;
+        }
+      });
+      return state;
+    case "ENABLE_VIDEO":
+      const VideostreamOne = state.streams.find(
+        (stream) =>
+          stream.conversationId === action.payload.conversationId &&
+          stream._id === action.payload._id
+      );
+      VideostreamOne.stream.getTracks().forEach((track) => {
+        if (track.kind === "video") {
+          track.enabled = true;
+        }
+      });
+      return state;
+    case "DISABLE_VIDEO":
+      const VideostreamTwo = state.streams.find(
+        (stream) =>
+          stream.conversationId === action.payload.conversationId &&
+          stream._id === action.payload._id
+      );
+      VideostreamTwo.stream.getTracks().forEach((track) => {
+        if (track.kind === "video") {
+          track.enabled = false;
+        }
+      });
+      return state;
+
     default:
       return state;
   }

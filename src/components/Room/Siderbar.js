@@ -5,10 +5,10 @@ import { VscChromeClose } from "react-icons/vsc";
 import { FiSettings } from "react-icons/fi";
 import { BsThreeDots } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
-import { socket } from "../../socket/socketConnection";
 import { getStream } from "../../functions/getStream";
 import { links } from "../../utils/sidelinks";
 function Siderbar({ roomData, showSidebar, setShowSidebar }) {
+  const socket = useSelector((state) => state.streams.socket);
   const [participants, setParticipants] = useState([]);
   const [activeLink, setActiveLink] = useState("Home");
   const [chevronDown, setChevronDown] = useState(false);
@@ -17,7 +17,6 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
   const peer = meeting.peer;
   const streamsData = useSelector((state) => state.streams);
   const dispatch = useDispatch();
-  const [streaming, setStreaming] = useState(false);
   const conversationId = roomData?.conversationId;
   const streamingState = streamsData.streaming.find(
     (streamState) => streamState.conversationId === roomData.conversationId
@@ -75,6 +74,23 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
 
   socket.off("get-participants").on("get-participants", (myusers) => {
     setParticipants(myusers);
+  });
+
+  socket.off("others_peerId").on("others_peerId", (data) => {
+    if (data.inviteeId === user._id) {
+      const streamData = streamsData.streams.find(
+        (stream) =>
+          stream.conversationId === roomData.conversationId &&
+          stream._id === user._id
+      );
+      peer?.call(data.peerId, streamData?.stream, {
+        metadata: {
+          _id: user._id,
+          image: user.image,
+          username: user.username,
+        },
+      });
+    }
   });
 
   return (

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Outlet, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Chat from "../components/Room/Chat";
 import Siderbar from "../components/Room/Siderbar";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,16 +7,17 @@ import axios from "axios";
 import Loader from "../components/Loader";
 import { GoThreeBars } from "react-icons/go";
 import { BsFillChatDotsFill } from "react-icons/bs";
+import Container from "../components/Container";
 import Peer from "peerjs";
-import { socket } from "../socket/socketConnection";
 function Room() {
+  const socket = useSelector((state) => state.streams.socket);
   const user = useSelector((state) => state.user);
-  const streamsData = useSelector((state) => state.streams);
   const { meetingId } = useParams();
   const [roomData, setRoomData] = useState();
   const [loading, setLoading] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showMobileChat, setShowMobileChat] = useState(false);
+  const streamsData = useSelector((state) => state.streams);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const info = {
@@ -53,21 +54,27 @@ function Room() {
           userId,
           username,
         });
-        if (response.data.roomData.creator === user._id) {
-          dispatch({
-            type: "INITIAL_STREAMING_STATE",
-            payload: response.data.roomData.conversationId,
-          });
-        }
+        dispatch({
+          type: "INITIAL_STREAMERS",
+          payload: response.data.roomData.conversationId,
+        });
+
         peer.on("open", (id) => {
           socket.emit("new-connection", {
             conversationId: response.data.roomData.conversationId,
             _id: user._id,
             username,
             peerId: id,
-            image,
+            image: user.image,
           });
         });
+        if (response.data.roomData.creator === user._id) {
+          dispatch({
+            type: "INITIAL_STREAMING_STATE",
+            payload: response.data.roomData.conversationId,
+          });
+        }
+
         setLoading(false);
         navigate("home");
       } else {
@@ -126,7 +133,10 @@ function Room() {
               showSidebar={showSidebar}
             />
             <div className="flex-1 xl:flex-[0.75] outlet pt-[3rem]  px-[1rem] xl:p-[1rem] xl:mt-0 xl:flex-[0.55] bg-[#1C1C1C] h-full overflow-y-auto ">
-              <Outlet context={{ setShowMobileChat, roomData }} />
+              <Container
+                roomData={roomData}
+                setShowMobileChat={setShowMobileChat}
+              />
             </div>
             <Chat
               setShowMobileChat={setShowMobileChat}

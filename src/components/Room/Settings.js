@@ -9,25 +9,34 @@ import { useDispatch, useSelector } from "react-redux";
 import Loader from "../Loader";
 import DeleteRoom from "../DeleteRoom";
 import CheckPopup from "../CheckPopup";
-import { socket } from "../../socket/socketConnection";
 
 function Settings() {
-  const { roomData } = useOutletContext();
-  const [showAlert, setShowAlert] = useState(false);
+  const {
+    adminName,
+    receivedInvitation,
+    setReceivedInvitation,
+    setAdminName,
+    showAlert,
+    setShowAlert,
+    alertMessage,
+    setAlertMessage,
+    setShowMobileChat,
+    user,
+    peer,
+    meeting,
+    streamsData,
+    socket,
+    roomData,
+    dispatch,
+    navigate,
+  } = useOutletContext();
   const [roomName, setRoomName] = useState(roomData?.name);
-  const [description, setDescription] = useState(roomData?.description);
   const [showCheckPopup, setShowCheckPopup] = useState(false);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [filled, setFilled] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
   const [generateNewId, setGenerateNewId] = useState(false);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
-  const firstName = user.username.includes(" ")
-    ? user.username.split(" ")[1]
-    : user.username;
+  const [description, setDescription] = useState("");
   const copyToClipboard = () => {
     copy(`https://www.roombrains.com/rooms/${roomData.meetingId}`);
     setAlertMessage("Link has been copied to clipboard");
@@ -119,6 +128,7 @@ function Settings() {
           setShowCheckPopup={setShowCheckPopup}
         />
       )}
+
       {showDeletePopup && (
         <DeleteRoom
           deleteRoom={deleteRoom}

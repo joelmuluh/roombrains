@@ -10,7 +10,6 @@ import { AiOutlineCaretRight } from "react-icons/ai";
 import { IoIosVideocam } from "react-icons/io";
 import { ImBlocked } from "react-icons/im";
 import { useSelector } from "react-redux";
-import { socket } from "../../socket/socketConnection";
 import Picker from "emoji-picker-react";
 import moment from "moment";
 import Alert from "../Alert";
@@ -25,8 +24,10 @@ function Chat({ conversationId, roomData, showMobileChat, setShowMobileChat }) {
   const [alertMessage, setAlertMessage] = useState("");
   const [showControls, setShowControls] = useState(true);
   const [showEmoji, setShowEmoji] = useState(false);
+  const socket = useSelector((state) => state.streams.socket);
 
   const user = useSelector((state) => state.user);
+  const streamsData = useSelector((state) => state.streams);
   const info = {
     userId: user._id,
     token: user.token,
@@ -282,6 +283,7 @@ const ChatMessage = ({
   setAlertMessage,
   setShowMobileChat,
 }) => {
+  const socket = useSelector((state) => state.streams.socket);
   const scrollDown = useRef();
   const [showChatPopup, setShowChatPopup] = useState(false);
   const [showUnblockPopup, setShowUnblockPopup] = useState(false);
@@ -335,10 +337,11 @@ const ChatMessage = ({
 
   const sendInvitation = () => {
     setShowChatPopup(false);
-    const streamObject = streamsData.streamers.find(
+    const streamArray = streamsData.streamers.find(
       (stream) => stream.conversationId === roomData.conversationId
     );
-    if (streamObject?.myStreamers.length >= 4) {
+
+    if (streamArray.myStreamers.length >= 4) {
       setAlertMessage("You can't invite more than 4 people");
       setShowAlert(true);
     } else {
@@ -354,6 +357,10 @@ const ChatMessage = ({
       }, 2000);
     }
   };
+
+  const streamArray = streamsData.streamers.find(
+    (stream) => stream.conversationId === roomData.conversationId
+  );
 
   return (
     <div
