@@ -225,6 +225,12 @@ body {
   }
 }
 
+/* @media (max-width: 340px) {
+  .mobile-input::placeholder {
+    font-size: 12px;
+  }
+} */
+
 @media (max-width: 270px) {
   .profile-change {
     font-size: 12px;

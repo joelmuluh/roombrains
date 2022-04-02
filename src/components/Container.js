@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
-import { getStream } from "../functions/getStream";
+import Alert from "./Alert";
 import Invitation from "./Invitation";
-
 function Container({ setShowMobileChat, roomData }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
@@ -69,23 +68,28 @@ function Container({ setShowMobileChat, roomData }) {
       }
     });
 
-    socket
-      .off("invitation-accepted")
-      .on("invitation-accepted", async (data) => {
-        if (roomData.creator === user._id) {
-          setAlertMessage(`${data.username} just accepted your invitation`);
-          setShowAlert(true);
-        } else {
-          setAlertMessage(`${data.username} has been invited on stream`);
-          setShowAlert(true);
-        }
-        socket.emit("peerId_to_invitee", {
-          peerId: peer?.id,
-          conversationId: roomData.conversationId,
-          inviteeId: data._id,
-        });
+    socket.off("invitation-accepted").on("invitation-accepted", (data) => {
+      if (roomData.creator === user._id) {
+        setAlertMessage(`${data.username} just accepted your invitation`);
+        setShowAlert(true);
+      } else {
+        setAlertMessage(`${data.username} has been invited on stream`);
+        setShowAlert(true);
+      }
+      socket.emit("peerId_to_invitee", {
+        peerId: peer?.id,
+        conversationId: roomData.conversationId,
+        inviteeId: data._id,
       });
-    //The invited member is getting other other users peerId and passing
+    });
+    socket.off("invitation_declined").on("invitation_declined", (data) => {
+      if (user._id === roomData.creator) {
+        setAlertMessage(
+          `Sorry ${firstName}, ${data.username} declined your Invitation`
+        );
+        setShowAlert(true);
+      }
+    });
 
     socket.off("admin-calling").on("admin-calling", (data) => {
       setAlertMessage(
@@ -274,29 +278,38 @@ function Container({ setShowMobileChat, roomData }) {
         _id: data._id,
       },
     });
+
     if (data._id === user._id) {
       setAlertMessage("The admin just muted you.");
       setShowAlert(true);
     }
   });
   socket.off("unmute_user_by_admin").on("unmute_user_by_admin", (data) => {
-    dispatch({
-      type: "UNMUTE_USER",
-      payload: {
-        conversationId: data.conversationId,
-        _id: data._id,
-      },
-    });
+    if (data._id === user._id) {
+      dispatch({
+        type: "UNMUTE_USER",
+        payload: {
+          conversationId: data.conversationId,
+          _id: data._id,
+        },
+      });
+    }
     if (data._id === user._id) {
       setAlertMessage("You have been unmuted.");
       setShowAlert(true);
     }
   });
+
+  const streamers = streamsData.streamers.find(
+    (stream) => stream.conversationId === roomData.conversationId
+  );
+  useEffect(() => {
+    console.log(streamers.myStreamers.length);
+  }, [streamers]);
   return (
     <>
       <Outlet
         context={{
-          Invitation,
           adminName,
           receivedInvitation,
           setReceivedInvitation,
@@ -314,6 +327,8 @@ function Container({ setShowMobileChat, roomData }) {
           roomData,
           dispatch,
           navigate,
+          Alert,
+          Invitation,
         }}
       />
     </>

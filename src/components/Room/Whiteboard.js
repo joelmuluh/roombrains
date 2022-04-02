@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
-import Alert from "../Alert";
-
 function WhiteBoard() {
   const {
+    Invitation,
+    Alert,
     adminName,
     receivedInvitation,
     setReceivedInvitation,
@@ -21,7 +21,6 @@ function WhiteBoard() {
     socket,
     roomData,
     dispatch,
-    Invitation,
   } = useOutletContext();
   return (
     <div>

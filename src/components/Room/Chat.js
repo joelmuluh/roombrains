@@ -13,7 +13,14 @@ import { useSelector } from "react-redux";
 import Picker from "emoji-picker-react";
 import moment from "moment";
 import Alert from "../Alert";
-function Chat({ conversationId, roomData, showMobileChat, setShowMobileChat }) {
+function Chat({
+  conversationId,
+  roomData,
+  showMobileChat,
+  setShowMobileChat,
+  setMessageCount,
+  messageCount,
+}) {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [page, setPage] = useState(1);
@@ -145,6 +152,9 @@ function Chat({ conversationId, roomData, showMobileChat, setShowMobileChat }) {
               createdAt,
             },
           ]);
+          if (!showMobileChat) {
+            setMessageCount((prev) => prev + 1);
+          }
         }
       );
   }, []);
@@ -168,7 +178,10 @@ function Chat({ conversationId, roomData, showMobileChat, setShowMobileChat }) {
           Room Chat
         </h1>
         <VscChromeClose
-          onClick={() => setShowMobileChat(false)}
+          onClick={() => {
+            setShowMobileChat(false);
+            setMessageCount(0);
+          }}
           className="chat-close-btn hidden text-white text-[1.6rem] absolute top-[1rem] right-[1rem]"
         />
       </div>
@@ -248,7 +261,7 @@ function Chat({ conversationId, roomData, showMobileChat, setShowMobileChat }) {
             />
           </div>
           <input
-            className="flex-1 flex flexwrap-wrap text-white outline-none border-none h-full bg-transparent pl-[1rem] pr-[0.6rem]"
+            className="flex-1 flex flexwrap-wrap text-white outline-none border-none h-full bg-transparent pl-[1rem] pr-[0.6rem] mobile-input"
             type="text"
             placeholder="Type a message"
             value={message}
@@ -260,7 +273,11 @@ function Chat({ conversationId, roomData, showMobileChat, setShowMobileChat }) {
             }}
           />
 
-          <IoMdSend color="#1492E6" onClick={() => sendMessage()} size={25} />
+          <IoMdSend
+            className="text-[25px] absolute right-[1rem]"
+            color="#1492E6 "
+            onClick={() => sendMessage()}
+          />
         </div>
       </div>
       <div className="h-[10%]"></div>

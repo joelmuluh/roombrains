@@ -17,6 +17,7 @@ function Room() {
   const [loading, setLoading] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showMobileChat, setShowMobileChat] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
   const streamsData = useSelector((state) => state.streams);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -117,13 +118,21 @@ function Room() {
                 </div>
               )}
               <div className="fixed chat-icon hidden top-[0.7rem] right-[1rem] ">
-                <BsFillChatDotsFill
-                  onClick={() => {
-                    setShowSidebar(false);
-                    setShowMobileChat(true);
-                  }}
-                  className="text-white text-[25px]"
-                />
+                <div className="relative">
+                  <BsFillChatDotsFill
+                    onClick={() => {
+                      setShowSidebar(false);
+                      setShowMobileChat(true);
+                      setMessageCount(0);
+                    }}
+                    className="text-white text-[25px]"
+                  />
+                  {messageCount !== 0 && (
+                    <div className="flex items-center justify-center h-[20px] w-[20px] rounded-full bg-red-500 text-white text-[12px] position absolute top-[-8px] right-[-8px] pointer-events-none">
+                      <span>{messageCount}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <Siderbar
@@ -143,7 +152,9 @@ function Room() {
               showMobileChat={showMobileChat}
               setShowSidebar={setShowSidebar}
               roomData={roomData}
-              conversationId={roomData?.conversationId}
+              conversationId={roomData.conversationId}
+              messageCount={messageCount}
+              setMessageCount={setMessageCount}
             />
           </div>
         </div>

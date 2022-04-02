@@ -8,10 +8,11 @@ import { BsCameraVideoFill } from "react-icons/bs";
 import { BsFillCameraVideoOffFill } from "react-icons/bs";
 import { ImExit } from "react-icons/im";
 import Avatar from "@mui/material/Avatar";
-import Alert from "../Alert";
 import { useDispatch, useSelector } from "react-redux";
 function Home() {
   const {
+    Invitation,
+    Alert,
     adminName,
     receivedInvitation,
     setReceivedInvitation,
@@ -29,7 +30,6 @@ function Home() {
     roomData,
     dispatch,
     navigate,
-    Invitation,
   } = useOutletContext();
 
   const [showControlsPopup, setShowControlsPopup] = useState(false);
@@ -41,7 +41,6 @@ function Home() {
           {roomData?.name}
         </h1>
       </div>
-      {showAlert && <Alert text={alertMessage} setShowAlert={setShowAlert} />}
 
       {streamsData.streams.length > 0 ? (
         <div className="pt-[2rem] video-wrapper gap-[1rem] lg:max-w-[900px] lg:mx-auto ">
@@ -92,6 +91,7 @@ function Home() {
             setShowMobileChat={setShowMobileChat}
           />
         )}
+        {showAlert && <Alert text={alertMessage} setShowAlert={setShowAlert} />}
       </>
     </div>
   );
@@ -273,7 +273,7 @@ const Stream = ({
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="p-[1rem] mobile-max-width w-[400px] h-[300px] bg-white text-black"
+              className="p-[1rem] mobile-max-width w-[400px] py-[1.5rem] bg-white text-black"
             >
               <div className="mb-[1.5rem] flex items-center justify-between">
                 <p className="font-bold">{username}</p>

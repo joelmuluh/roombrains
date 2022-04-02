@@ -2,16 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Checkbox } from "antd";
 import { BiClipboard } from "react-icons/bi";
 import copy from "copy-to-clipboard";
-import Alert from "../Alert";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../Loader";
 import DeleteRoom from "../DeleteRoom";
 import CheckPopup from "../CheckPopup";
-
 function Settings() {
   const {
+    Alert,
     adminName,
     receivedInvitation,
     setReceivedInvitation,
