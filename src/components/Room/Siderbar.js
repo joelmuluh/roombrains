@@ -104,7 +104,7 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
     <div
       className={`xl:flex-[0.2] ${
         showSidebar ? "show-sidebar" : "hide-sidebar"
-      } xl:translate-x-0 xl:block xl:static bg-[#1F1F1F] h-full`}
+      } xl:translate-x-0 xl:block xl:static bg-[#1F1F1F] h-full `}
     >
       <VscChromeClose
         onClick={() => setShowSidebar(false)}

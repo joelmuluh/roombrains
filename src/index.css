@@ -132,6 +132,7 @@ body {
     top: 0;
     z-index: 600;
     transition: 600ms;
+    width: 50%;
   }
   .hide-sidebar {
     transform: translateX(-100%);

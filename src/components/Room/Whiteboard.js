@@ -56,7 +56,7 @@ function WhiteBoard() {
       context.strokeStyle = "black";
       context.lineWidth = "10";
       context.lineTo(coordinates.x, coordinates.y);
-      // context.lineTo(e.clientX, e.clientY);
+
       context.stroke();
     } else return;
   };
