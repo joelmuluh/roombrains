@@ -255,7 +255,7 @@ const Stream = ({
             {username?.split("")[0]}
           </Avatar>
           <p className="flex-1 ml-[12px] text-[14px]">
-            {_id === roomData.creator ? "The Admin" : username}
+            {_id === roomData.creator ? `${username} (The Admin)` : username}
           </p>
 
           <BsThreeDots

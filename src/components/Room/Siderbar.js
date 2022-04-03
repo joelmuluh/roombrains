@@ -77,9 +77,11 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
     });
   };
 
-  socket.off("get-participants").on("get-participants", (myusers) => {
-    setParticipants(myusers);
-  });
+  useEffect(() => {
+    socket.off("get-participants").on("get-participants", (myusers) => {
+      setParticipants(myusers);
+    });
+  }, []);
 
   socket.off("others_peerId").on("others_peerId", (data) => {
     if (data.inviteeId === user._id) {
@@ -194,7 +196,7 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
         </div>
         {chevronDown && (
           <div className="mt-[0.6rem] space-y-[0.9rem] h-[250px] overflow-y-auto relative">
-            {participants.map((participant, index) => (
+            {participants.map((participant) => (
               <Participant
                 key={participant._id}
                 conversationId={roomData.conversationId}
@@ -358,17 +360,19 @@ const Participant = ({ username, conversationId, _id, image, roomData }) => {
     <>
       <div className="flex items-center justify-between px-[1rem]">
         <p className=" opacity-[0.9]">{username}</p>
-        <BsThreeDots
-          onClick={() => setShowChatPopup(true)}
-          className="mr-[1rem]"
-          size={20}
-        />
+        {user._id === roomData.creator && _id !== roomData.creator && (
+          <BsThreeDots
+            onClick={() => setShowChatPopup(true)}
+            className="mr-[1rem]"
+            size={20}
+          />
+        )}
       </div>
       {showAlert && <Alert text={alertMessage} setShowAlert={setShowAlert} />}
       {showChatPopup && (
         <div
           onClick={() => setShowChatPopup(false)}
-          className="scale-in fixed top-0 left-0 right-0  bottom-0 bg-[rgba(0,0,0,0.7)]  py-[1rem] z-[600] flex justify-center items-center"
+          className="scale-in fixed right-0 top-0 left-0 bottom-0 bg-[rgba(0,0,0,0.7)] py-[1rem] z-[600] flex justify-center items-center"
         >
           <div
             onClick={(e) => e.stopPropagation()}

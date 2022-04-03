@@ -44,6 +44,8 @@ function Container({ setShowMobileChat, roomData }) {
       const streamers = streamsData.streamers.find(
         (stream) => stream.conversationId === roomData.conversationId
       );
+      console.log(streamers.myStreamers.includes(user._id));
+      console.log(streamers.myStreamers);
 
       if (streamers.myStreamers.includes(user._id)) {
         const streamData = streamsData.streams.find(
@@ -300,12 +302,27 @@ function Container({ setShowMobileChat, roomData }) {
     }
   });
 
-  const streamers = streamsData.streamers.find(
-    (stream) => stream.conversationId === roomData.conversationId
-  );
-  useEffect(() => {
-    console.log(streamers.myStreamers.length);
-  }, [streamers]);
+  socket.off("new-connection").on("new-connection", async (data) => {
+    const streamers = streamsData.streamers.find(
+      (stream) => stream.conversationId === roomData.conversationId
+    );
+
+    if (streamers.myStreamers.includes(user._id)) {
+      const streamData = streamsData.streams.find(
+        (stream) =>
+          stream.conversationId === roomData.conversationId &&
+          stream._id === user._id
+      );
+      peer.call(data.peerId, streamData.stream, {
+        metadata: {
+          _id: user._id,
+          image: user.image,
+          username: user.username,
+        },
+      });
+    }
+  });
+
   return (
     <>
       <Outlet

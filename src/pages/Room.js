@@ -99,7 +99,7 @@ function Room() {
       {loading && !roomData?.exists ? (
         <div
           style={{ transform: "translate(-50%, -50%)" }}
-          className="fixed top-[50%] right-[50%]"
+          className="fixed top-[50%] right-[50%] left-[50%]"
         >
           <Loader />
         </div>
