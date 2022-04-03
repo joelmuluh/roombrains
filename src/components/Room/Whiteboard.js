@@ -61,7 +61,10 @@ function WhiteBoard() {
       context.lineTo(coordinates.x, coordinates.y);
 
       context.stroke();
-      const canvasData = canvas.toDataURL();
+      const canvasData = {
+        x: e.clientX,
+        y: e.clientY,
+      };
       socket.emit("canvasData", {
         conversationId: roomData.conversationId,
         canvasData,
@@ -96,9 +99,14 @@ function WhiteBoard() {
   };
 
   socket.off("canvasData").on("canvasData", (data) => {
-    const img = new Image();
-    img.src = data.canvasData;
-    context.drawImage(img, 0, 0);
+    setCoordinates({
+      x: data.canvasData.x,
+      y: data.canvasData.y,
+    });
+
+    context.lineTo(data.canvasData.x, data.canvasData.y);
+    context.stroke();
+    setCoordinates(null);
   });
   return (
     <div className="h-full ">
