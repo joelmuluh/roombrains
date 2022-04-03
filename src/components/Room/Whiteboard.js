@@ -28,6 +28,9 @@ function WhiteBoard() {
   const canvas = canvasRef.current;
   const [drawing, setDrawing] = useState(false);
   const [context, setContext] = useState(null);
+  const [color, setColor] = useState("black");
+  const [lineWidth, setLineWidth] = useState("10");
+  const [eraserActive, setEraserActive] = useState(false);
   useEffect(() => {
     const canvasApi = document.querySelector(".board");
     canvasApi.height = container.current.clientHeight;
@@ -53,38 +56,22 @@ function WhiteBoard() {
         x: e.clientX,
         y: e.clientY,
       });
-      context.strokeStyle = "black";
-      context.lineWidth = "10";
+      context.strokeStyle = color;
+      context.lineWidth = lineWidth;
       context.lineTo(coordinates.x, coordinates.y);
 
       context.stroke();
+      const canvasData = canvas.toDataURL();
+      socket.emit("canvasData", {
+        conversationId: roomData.conversationId,
+        canvasData,
+      });
     } else return;
   };
 
-  const touchStart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDrawing(true);
-    context.beginPath();
-  };
-  const touchEnd = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDrawing(false);
-    context.beginPath();
-  };
-  const touchMove = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (drawing) {
-      var touch = e.touches[0];
-      var mouseEvent = new MouseEvent("mousemove", {
-        clientX: touch.clientX,
-        clientY: touch.clientY,
-      });
-      canvas.dispatchEvent(mouseEvent);
-    } else return;
-  };
+  const touchStart = (e) => {};
+  const touchEnd = (e) => {};
+  const touchMove = (e) => {};
 
   const clearCanvas = () => {
     context.save();
@@ -97,19 +84,44 @@ function WhiteBoard() {
     context.restore();
   };
 
-  // context.clearRect(0, 0, canvas.width, canvas.height);
+  const Eraser = () => {
+    setEraserActive(!eraserActive);
+    if (eraserActive) {
+      setColor("black");
+      setLineWidth("10");
+    } else {
+      setColor("white");
+      setLineWidth("50");
+    }
+  };
+
+  socket.off("canvasData").on("canvasData", (data) => {
+    const img = new Image();
+    img.src = data.canvasData;
+    context.drawImage(img, 0, 0);
+  });
   return (
     <div className="h-full ">
-      <button
-        onClick={() => clearCanvas()}
-        className="text-white w-[100px] h-[40px] bg-red-400"
-      >
-        Clear page
-      </button>
       <div className="pb-[1rem] border-b border-[rgba(255,255,255,0.1)]">
         <h1 className="font-bold text-[1rem] lg:text-[1.5rem]  text-center">
           {roomData.name}
         </h1>
+      </div>
+      <div className="flex justify-between ">
+        <button
+          onClick={() => clearCanvas()}
+          className="text-white w-[100px] h-[40px] bg-red-400"
+        >
+          Clear page
+        </button>
+        <button
+          onClick={() => Eraser()}
+          className={`text-white w-[100px] h-[40px] ${
+            eraserActive ? "bg-[black]" : "bg-blue-400"
+          } transition duration-200 `}
+        >
+          Eraser
+        </button>
       </div>
       <div ref={container} className="h-full w-full overflow-y-auto">
         <canvas

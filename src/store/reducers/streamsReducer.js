@@ -1,4 +1,10 @@
 import { io } from "socket.io-client";
+const connectionOptions = {
+  "force new connection": true,
+  reconnectionAttempts: "Infinity",
+  timeout: 10000,
+};
+
 const initialState = {
   streaming: [
     {
@@ -14,7 +20,7 @@ const initialState = {
       participants: [],
     },
   ],
-  socket: io(`${process.env.REACT_APP_API}`),
+  socket: io(`${process.env.REACT_APP_API}`, connectionOptions),
 };
 
 export const streamReducer = (state = initialState, action) => {
