@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Avatar from "@mui/material/Avatar";
 import { VscChromeClose } from "react-icons/vsc";
 import { IoIosVideocam } from "react-icons/io";
 import { ImBlocked } from "react-icons/im";
+import { HiCode } from "react-icons/hi";
+import { VscEditorLayout } from "react-icons/vsc";
 import axios from "axios";
 import { useSelector } from "react-redux";
+
 function ChatPopup({
   username,
   image,
@@ -20,7 +23,8 @@ function ChatPopup({
   const user = useSelector((state) => state.user);
   const streamsData = useSelector((state) => state.streams);
   const socket = useSelector((state) => state.streams.socket);
-
+  const [hasEditorAccess, setHasEditorAccess] = useState(false);
+  const [hasWhiteboardAccess, setHasWhiteboardAccess] = useState(false);
   const blockMember = async () => {
     setBlocked(true);
     socket.emit("block-user", { conversationId, _id: _id });
@@ -72,14 +76,218 @@ function ChatPopup({
     }
   };
 
+  const EditorAccess = () => {
+    if (hasEditorAccess) {
+      const editorAccess = JSON.parse(
+        window.localStorage.getItem("editorAccess")
+      );
+      if (editorAccess) {
+        const myAccesses = editorAccess.find(
+          (access) => access.conversationId === conversationId
+        );
+        if (myAccesses) {
+          const newPermissions = myAccesses.permissions.filter(
+            (user) => user !== _id
+          );
+          const permissions = { conversationId, permissions: newPermissions };
+          const newData = editorAccess.filter(
+            (access) => access.conversationId !== conversationId
+          );
+          const fullEdit = [...newData, permissions];
+          window.localStorage.setItem("editorAccess", JSON.stringify(fullEdit));
+          setShowAlert(true);
+          setAlertMessage(`${username} has been denied access to the Editor`);
+          socket.emit("restrict_access_to_editor", {
+            conversationId,
+            userId: _id,
+            adminName: roomData.creatorName,
+          });
+        }
+      }
+    } else {
+      const editorAccess = JSON.parse(
+        window.localStorage.getItem("editorAccess")
+      );
+      if (editorAccess) {
+        const myAccesses = editorAccess.find(
+          (access) => access.conversationId === conversationId
+        );
+        if (myAccesses) {
+          const permissions = {
+            conversationId,
+            permissions: [...myAccesses.permissions, _id],
+          };
+          const newData = editorAccess.filter(
+            (access) => access.conversationId !== conversationId
+          );
+          const fullEdit = [...newData, permissions];
+          window.localStorage.setItem("editorAccess", JSON.stringify(fullEdit));
+          setShowAlert(true);
+          setAlertMessage(`${username} now has access to the Editor`);
+          socket.emit("give_access_to_editor", {
+            conversationId,
+            userId: _id,
+            adminName: roomData.creatorName,
+          });
+        } else {
+          window.localStorage.setItem(
+            "editorAccess",
+            JSON.stringify([
+              ...editorAccess,
+              { conversationId, permissions: [_id] },
+            ])
+          );
+          setShowAlert(true);
+          setAlertMessage(`${username} now has access to the Editor`);
+          socket.emit("give_access_to_editor", {
+            conversationId,
+            userId: _id,
+            adminName: roomData.creatorName,
+          });
+        }
+      } else {
+        window.localStorage.setItem(
+          "editorAccess",
+          JSON.stringify([{ conversationId, permissions: [_id] }])
+        );
+        setShowAlert(true);
+        setAlertMessage(`${username} now has access to the Editor`);
+        socket.emit("give_access_to_editor", {
+          conversationId,
+          userId: _id,
+          adminName: roomData.creatorName,
+        });
+      }
+    }
+  };
+  const WhiteboardAccess = () => {
+    if (hasWhiteboardAccess) {
+      const whiteboardAccess = JSON.parse(
+        window.localStorage.getItem("whiteboardAccess")
+      );
+      if (whiteboardAccess) {
+        const myAccesses = whiteboardAccess.find(
+          (access) => access.conversationId === conversationId
+        );
+        if (myAccesses) {
+          const newPermissions = myAccesses.permissions.filter(
+            (user) => user !== _id
+          );
+          const permissions = { conversationId, permissions: newPermissions };
+          const newData = whiteboardAccess.filter(
+            (access) => access.conversationId !== conversationId
+          );
+          const fullEdit = [...newData, permissions];
+          window.localStorage.setItem(
+            "whiteboardAccess",
+            JSON.stringify(fullEdit)
+          );
+          setShowAlert(true);
+          setAlertMessage(`${username} has been denied access to whiteboard`);
+          socket.emit("restrict_access_to_whiteboard", {
+            conversationId,
+            userId: _id,
+            adminName: roomData.creatorName,
+          });
+        }
+      }
+    } else {
+      const whiteboardAccess = JSON.parse(
+        window.localStorage.getItem("whiteboardAccess")
+      );
+      if (whiteboardAccess) {
+        const myAccesses = whiteboardAccess.find(
+          (access) => access.conversationId === conversationId
+        );
+        if (myAccesses) {
+          const permissions = {
+            conversationId,
+            permissions: [...myAccesses.permissions, _id],
+          };
+          const newData = whiteboardAccess.filter(
+            (access) => access.conversationId !== conversationId
+          );
+          const fullEdit = [...newData, permissions];
+          window.localStorage.setItem(
+            "whiteboardAccess",
+            JSON.stringify(fullEdit)
+          );
+          setShowAlert(true);
+          setAlertMessage(`${username} now has access to the whiteboard`);
+          socket.emit("give_access_to_whiteboard", {
+            conversationId,
+            userId: _id,
+            adminName: roomData.creatorName,
+          });
+        } else {
+          window.localStorage.setItem(
+            "whiteboardAccess",
+            JSON.stringify([
+              ...whiteboardAccess,
+              { conversationId, permissions: [_id] },
+            ])
+          );
+          setShowAlert(true);
+          setAlertMessage(`${username} now has access to the whiteboard`);
+          socket.emit("give_access_to_whiteboard", {
+            conversationId,
+            userId: _id,
+            adminName: roomData.creatorName,
+          });
+        }
+      } else {
+        window.localStorage.setItem(
+          "whiteboardAccess",
+          JSON.stringify([{ conversationId, permissions: [_id] }])
+        );
+        setShowAlert(true);
+        setAlertMessage(`${username} now has access to the whiteboard`);
+        socket.emit("give_access_to_whiteboard", {
+          conversationId,
+          userId: _id,
+          adminName: roomData.creatorName,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    const editorAccess = JSON.parse(
+      window.localStorage.getItem("editorAccess")
+    );
+    const whiteboardAccess = JSON.parse(
+      window.localStorage.getItem("whiteboardAccess")
+    );
+    if (editorAccess) {
+      const myAccesses = editorAccess.find(
+        (access) => access.conversationId === conversationId
+      );
+      if (myAccesses) {
+        if (myAccesses.permissions.includes(_id)) {
+          setHasEditorAccess(true);
+        }
+      }
+    }
+    if (whiteboardAccess) {
+      const myAccesses = whiteboardAccess.find(
+        (access) => access.conversationId === conversationId
+      );
+      if (myAccesses) {
+        if (myAccesses.permissions.includes(_id)) {
+          setHasWhiteboardAccess(true);
+        }
+      }
+    }
+  }, []);
+
   return (
     <div
       onClick={() => setShowPopup(false)}
-      className="scale-in fixed top-0 left-0 right-0  bottom-0 bg-[rgba(0,0,0,0.7)]  py-[1rem] z-[600] flex justify-center items-center"
+      className="scale-in fixed top-0 left-0 right-0 bottom-0 bg-[rgba(0,0,0,0.7)]  py-[1rem] z-[600] flex justify-center items-center"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="p-[1rem] mobile-max-width w-[400px] h-[300px] bg-white text-black"
+        className="px-[1rem] mobile-max-width w-[450px] py-[2rem] bg-white text-black"
       >
         <div className="mb-[1rem] flex items-center justify-between">
           <p className="font-bold">{username}</p>
@@ -94,9 +302,35 @@ function ChatPopup({
             }}
             className="px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
           >
-            <IoIosVideocam className="text-20px" />
-            <p className="text-[14px] lg:text-[16px] cursor-pointer">
+            <IoIosVideocam className="text-[16px] lg:text-[25px]" />
+            <p className="text-[12px] md:text-[16px] cursor-pointer">
               Invite to Video Stream
+            </p>
+          </div>
+          <div
+            onClick={() => {
+              WhiteboardAccess();
+              setShowPopup(false);
+            }}
+            className="p-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex items-center space-x-[1rem] hover:bg-gray-300 transition duration-200 cursor-pointer"
+          >
+            <VscEditorLayout className="text-[16px] lg:text-[25px]" />
+            <p className="text-[12px] md:text-[16px] cursor-pointer">
+              {hasWhiteboardAccess
+                ? "Restrict from Whiteboard"
+                : "Access to Whiteboard"}
+            </p>
+          </div>
+          <div
+            onClick={() => {
+              EditorAccess();
+              setShowPopup(false);
+            }}
+            className="p-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex items-center space-x-[1rem] hover:bg-gray-300 transition duration-200 cursor-pointer"
+          >
+            <HiCode className="text-[16px] lg:text-[25px]" />
+            <p className="text-[12px] md:text-[16px] cursor-pointer">
+              {hasEditorAccess ? "Restrict from Editor" : "Access to Editor"}
             </p>
           </div>
           <div
@@ -106,8 +340,8 @@ function ChatPopup({
             }}
             className="p-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex items-center space-x-[1rem] hover:bg-gray-300 transition duration-200 cursor-pointer"
           >
-            <ImBlocked className="text-20px text-red-500" />
-            <p className="text-[14px] lg:text-[16px] cursor-pointer">Block</p>
+            <ImBlocked className="text-[16px] lg:text-[25px] text-red-500" />
+            <p className="text-[12px] md:text-[16px] cursor-pointer">Block</p>
           </div>
         </div>
       </div>

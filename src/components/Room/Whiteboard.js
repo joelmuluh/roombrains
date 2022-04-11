@@ -29,17 +29,15 @@ function WhiteBoard() {
   const [coordinates, setCoordinates] = useState(null);
   const container = useRef();
   const canvasRef = useRef();
-  const canvas = canvasRef.current;
   const [drawing, setDrawing] = useState(false);
   const [context, setContext] = useState(null);
   const [color, setColor] = useState("black");
   const [lineWidth, setLineWidth] = useState("10");
   const [eraserActive, setEraserActive] = useState(false);
   useEffect(() => {
-    const canvasApi = document.querySelector(".board");
-    canvasApi.height = container.current.clientHeight;
-    canvasApi.width = container.current.clientWidth;
-    const CanvasContent = canvasApi.getContext("2d");
+    canvasRef.current.height = container.current.clientHeight;
+    canvasRef.current.width = container.current.clientWidth;
+    const CanvasContent = canvasRef.current.getContext("2d");
     const rect = container.current.getBoundingClientRect();
     CanvasContent.translate(-rect.x, -rect.y);
     setContext(CanvasContent);
@@ -51,6 +49,8 @@ function WhiteBoard() {
       container.current.clientWidth,
       container.current.clientHeight
     );
+    canvasRef.current.height = container.current.clientHeight;
+    canvasRef.current.width = container.current.clientWidth;
     context.putImageData(image, 0, 0);
     const rect = container.current.getBoundingClientRect();
     context.translate(-rect.x, -rect.y);
@@ -59,11 +59,21 @@ function WhiteBoard() {
     setDrawing(true);
     context.beginPath();
     setCoordinates(null);
-    socket.emit("begin-new-mouse-path", {
-      conversationId: roomData.conversationId,
-      lineWidth,
-      color,
-    });
+    const myWhiteboardAccess = JSON.parse(
+      window.localStorage.getItem("myWhiteboardAccess")
+    );
+    if (myWhiteboardAccess || roomData.creator === user._id) {
+      if (
+        myWhiteboardAccess?.includes(roomData.conversationId) ||
+        roomData.creator === user._id
+      ) {
+        socket.emit("begin-new-mouse-path", {
+          conversationId: roomData.conversationId,
+          lineWidth,
+          color,
+        });
+      }
+    }
   };
   const mouseUp = () => {
     setDrawing(false);
@@ -94,12 +104,23 @@ function WhiteBoard() {
         x: xValue,
         y: yValue,
       };
-      socket.emit("canvasData", {
-        conversationId: roomData.conversationId,
-        canvasData,
-        lineWidth,
-        color,
-      });
+
+      const myWhiteboardAccess = JSON.parse(
+        window.localStorage.getItem("myWhiteboardAccess")
+      );
+      if (myWhiteboardAccess || roomData.creator === user._id) {
+        if (
+          myWhiteboardAccess?.includes(roomData.conversationId) ||
+          roomData.creator === user._id
+        ) {
+          socket.emit("canvasData", {
+            conversationId: roomData.conversationId,
+            canvasData,
+            lineWidth,
+            color,
+          });
+        }
+      }
     } else return;
   };
 
@@ -107,11 +128,22 @@ function WhiteBoard() {
     setDrawing(true);
     context.beginPath();
     setCoordinates(null);
-    socket.emit("begin-new-mouse-path", {
-      conversationId: roomData.conversationId,
-      lineWidth,
-      color,
-    });
+
+    const myWhiteboardAccess = JSON.parse(
+      window.localStorage.getItem("myWhiteboardAccess")
+    );
+    if (myWhiteboardAccess || roomData.creator === user._id) {
+      if (
+        myWhiteboardAccess?.includes(roomData.conversationId) ||
+        roomData.creator === user._id
+      ) {
+        socket.emit("begin-new-mouse-path", {
+          conversationId: roomData.conversationId,
+          lineWidth,
+          color,
+        });
+      }
+    }
   };
   const touchEnd = (e) => {
     setDrawing(false);
@@ -140,27 +172,48 @@ function WhiteBoard() {
         x: xValue,
         y: yValue,
       };
-      socket.emit("canvasData", {
-        conversationId: roomData.conversationId,
-        canvasData,
-        lineWidth,
-        color,
-      });
+      const myWhiteboardAccess = JSON.parse(
+        window.localStorage.getItem("myWhiteboardAccess")
+      );
+      if (myWhiteboardAccess || roomData.creator === user._id) {
+        if (
+          myWhiteboardAccess?.includes(roomData.conversationId) ||
+          roomData.creator === user._id
+        ) {
+          socket.emit("canvasData", {
+            conversationId: roomData.conversationId,
+            canvasData,
+            lineWidth,
+            color,
+          });
+        }
+      }
     } else return;
   };
 
   const clear = () => {
     context.save();
     context.setTransform(1, 0, 0, 1, 0, 0);
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     context.restore();
   };
 
   const clearCanvas = () => {
     clear();
-    socket.emit("clear-canvas", {
-      conversationId: roomData.conversationId,
-    });
+
+    const myWhiteboardAccess = JSON.parse(
+      window.localStorage.getItem("myWhiteboardAccess")
+    );
+    if (myWhiteboardAccess || roomData.creator === user._id) {
+      if (
+        myWhiteboardAccess?.includes(roomData.conversationId) ||
+        roomData.creator === user._id
+      ) {
+        socket.emit("clear-canvas", {
+          conversationId: roomData.conversationId,
+        });
+      }
+    }
   };
 
   const Eraser = () => {
@@ -243,7 +296,7 @@ function WhiteBoard() {
   // });
 
   return (
-    <div className="h-full overflow-y-hidden">
+    <div className="h-full overflow-y-auto">
       <div className="sticky top-0 x-0 w-full bg-[#1F1F1F] px-[1rem]">
         {streamsData.streams.length > 0 && (
           <div className="py-[0.8rem] small-video-wrapper gap-[1rem] ">
@@ -265,25 +318,12 @@ function WhiteBoard() {
           </div>
         )}
         <div className="flex justify-between text-[13px] lg:text-[15px]">
-          {/* <button
+          <button
             onClick={() => clearCanvas()}
             className="text-white w-[90px] h-[30px] lg:w-[100px] lg:h-[40px] bg-red-400"
           >
             Clear page
-          </button> */}
-          <Button
-            variant="contained"
-            onClick={() => clearCanvas()}
-            className="text-white w-[90px] h-[30px] lg:w-[100px] lg:h-[40px] bg-red-400"
-            sx={{
-              backgroundColor: "tomato",
-              color: "white",
-              width: "90px",
-              height: "40px",
-            }}
-          >
-            clear
-          </Button>
+          </button>
           <button
             onClick={() => Eraser()}
             className={`text-white w-[90px] h-[30px] lg:w-[100px] lg:h-[40px] ${

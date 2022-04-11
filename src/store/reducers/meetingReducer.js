@@ -2,6 +2,8 @@ const initialState = {
   peer: null,
   intended_room: null,
   blocked_info: null,
+  coders: [],
+  whiteboarders: [],
 };
 
 export const meetingReducer = (state = initialState, action) => {
@@ -16,6 +18,7 @@ export const meetingReducer = (state = initialState, action) => {
       return { ...state, blocked_info: action.payload };
     case "CLEAR_BLOCKED_INFO":
       return { ...state, blocked_info: null };
+
     default:
       return state;
   }

@@ -116,9 +116,7 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
             {user.username}
           </h1>
           <p className="text-[13px] lg:text-[16px] opacity-[0.75] mt-[6px]">
-            {roomData?.creatorName === user.username
-              ? "Executive President"
-              : "Member"}
+            {roomData?.creatorName === user.username ? "Admin" : "Member"}
           </p>
         </div>
       </div>
@@ -331,6 +329,7 @@ const Participant = ({ username, conversationId, _id, image, roomData }) => {
           setBlocked={setBlocked}
         />
       )}
+      {showAlert && <Alert text={alertMessage} setShowAlert={setShowAlert} />}
     </>
   );
 };

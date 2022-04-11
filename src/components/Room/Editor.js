@@ -37,25 +37,31 @@ function Editor() {
     roomData,
     dispatch,
     navigate,
+    code,
+    setCode,
+    language,
+    setLanguage,
   } = useOutletContext();
-  const templates = {
-    c: `#include <stdio.h>
-int main() {
+  const [codeFontSize, setCodeFontSize] = useState(20);
 
-printf("Hello world");
-return 0;
-
-}`,
+  const writeCode = (e) => {
+    setCode(e);
+    const myEditorAccess = JSON.parse(
+      window.localStorage.getItem("myEditorAccess")
+    );
+    if (myEditorAccess || roomData.creator === user._id) {
+      if (
+        myEditorAccess?.includes(roomData.conversationId) ||
+        roomData.creator === user._id
+      ) {
+        socket.emit("code_from_editor", {
+          conversationId: roomData.conversationId,
+          userId: user._id,
+          code: e,
+        });
+      }
+    }
   };
-  const [codeFontSize, setCodeFontSize] = useState(20),
-    [showLoader, setShowLoader] = useState(true),
-    [language, setLanguage] = useState("c_cpp"),
-    [code, setCode] = useState(templates.c),
-    [outputValue, setOutputValue] = useState(""),
-    [takeInput, setTakeInput] = useState(false),
-    [executing, setExecuting] = useState(false),
-    [input, setInput] = useState("");
-
   return (
     <div className="h-full ">
       <div className="h-[80%]">
@@ -84,7 +90,13 @@ return 0;
           </div>
 
           <div className="flex justify-between items-center">
-            <SelectLanguage language={language} setLanguage={setLanguage} />
+            <SelectLanguage
+              language={language}
+              setLanguage={setLanguage}
+              user={user}
+              roomData={roomData}
+              socket={socket}
+            />
             <Button
               variant="contained"
               color="primary"
@@ -98,8 +110,7 @@ return 0;
           mode={language}
           theme="dracula"
           onChange={(e) => {
-            setCode(e);
-            console.log(e);
+            writeCode(e);
           }}
           name="UNIQUE_ID_OF_DIV"
           setOptions={{
@@ -142,20 +153,35 @@ const Stream = ({ stream }) => {
   return <video className="w-[60px] md:w-[100px]" ref={streamRef} autoPlay />;
 };
 
-function SelectLanguage({ language, setLanguage }) {
+function SelectLanguage({ language, setLanguage, user, roomData, socket }) {
+  const changeLanguage = (e) => {
+    setLanguage(e.target.value);
+    const myEditorAccess = JSON.parse(
+      window.localStorage.getItem("myEditorAccess")
+    );
+    if (myEditorAccess || roomData.creator === user._id) {
+      if (
+        myEditorAccess?.includes(roomData.conversationId) ||
+        roomData.creator === user._id
+      ) {
+        socket.emit("change_programming_language", {
+          conversationId: roomData.conversationId,
+          userId: user._id,
+          language: e.target.value,
+        });
+      }
+    }
+  };
   return (
     <Select
       labelId="demo-simple-select-filled-label"
       id="demo-simple-select-filled"
       value={language}
-      onChange={(e) => {
-        setLanguage(e.target.value);
-      }}
+      onChange={(e) => changeLanguage(e)}
       variant="outlined"
-      className="my-[7px] text-left h-[2rem] w-[100px] bg-white"
+      className="my-[7px] text-left h-[2rem] w-[95px] md:w-[100px] bg-white"
     >
-      <MenuItem value={"c_cpp"}>C++</MenuItem>
-      <MenuItem value={"c_cpp"}>C</MenuItem>
+      <MenuItem value={"c_cpp"}>C/C++</MenuItem>
       <MenuItem value={"java"}>Java</MenuItem>
       <MenuItem value={"python"}>Python</MenuItem>
     </Select>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
+import { templates } from "../utils/code_templates";
 import Alert from "./Alert";
 import Invitation from "./Invitation";
 function Container({ setShowMobileChat, roomData }) {
@@ -14,6 +15,8 @@ function Container({ setShowMobileChat, roomData }) {
   const [canvasData, setCanvasData] = useState(null);
   const [clearTheCanvas, setClearTheCanvas] = useState(0);
   const [newPath, setNewPath] = useState(0);
+  const [language, setLanguage] = useState("c_cpp");
+  const [code, setCode] = useState(templates.c);
   const peer = meeting.peer;
   const streamsData = useSelector((state) => state.streams);
   const socket = streamsData.socket;
@@ -357,6 +360,117 @@ function Container({ setShowMobileChat, roomData }) {
     socket.off("begin-new-mouse-path").on("begin-new-mouse-path", (data) => {
       setNewPath((prev) => prev + 1);
     });
+
+    socket
+      .off("give_access_to_whiteboard")
+      .on("give_access_to_whiteboard", (data) => {
+        if (data.userId === user._id) {
+          const myWhiteboardAccess = JSON.parse(
+            window.localStorage.getItem("myWhiteboardAccess")
+          );
+          if (myWhiteboardAccess) {
+            if (!myWhiteboardAccess.includes(data.conversationId)) {
+              setAlertMessage(
+                "The Admin has given you permission to share the whiteboard data with everyone."
+              );
+              setShowAlert(true);
+              window.localStorage.setItem(
+                "myWhiteboardAccess",
+                JSON.stringify([...myWhiteboardAccess, data.conversationId])
+              );
+            }
+          } else {
+            window.localStorage.setItem(
+              "myWhiteboardAccess",
+              JSON.stringify([data.conversationId])
+            );
+          }
+        }
+      });
+    socket.off("give_access_to_editor").on("give_access_to_editor", (data) => {
+      if (data.userId === user._id) {
+        const myEditorAccess = JSON.parse(
+          window.localStorage.getItem("myEditorAccess")
+        );
+        if (myEditorAccess) {
+          if (!myEditorAccess.includes(data.conversationId)) {
+            setAlertMessage(
+              "The Admin has given you permission to share your code with everyone."
+            );
+            setShowAlert(true);
+            window.localStorage.setItem(
+              "myEditorAccess",
+              JSON.stringify([...myEditorAccess, data.conversationId])
+            );
+          }
+        } else {
+          window.localStorage.setItem(
+            "myEditorAccess",
+            JSON.stringify([data.conversationId])
+          );
+        }
+      }
+    });
+
+    socket
+      .off("restrict_access_to_editor")
+      .on("restrict_access_to_editor", (data) => {
+        if (data.userId === user._id) {
+          const myEditorAccess = JSON.parse(
+            window.localStorage.getItem("myEditorAccess")
+          );
+          if (myEditorAccess) {
+            if (myEditorAccess.includes(data.conversationId)) {
+              setAlertMessage(
+                "The Admin just restricted you from sharing your code."
+              );
+              setShowAlert(true);
+              const newEditorAccess = myEditorAccess.filter(
+                (theConversationId) => theConversationId !== data.conversationId
+              );
+              window.localStorage.setItem(
+                "myEditorAccess",
+                JSON.stringify(newEditorAccess)
+              );
+            }
+          }
+        }
+      });
+    socket
+      .off("restrict_access_to_whiteboard")
+      .on("restrict_access_to_whiteboard", (data) => {
+        if (data.userId === user._id) {
+          const myWhiteboardAccess = JSON.parse(
+            window.localStorage.getItem("myWhiteboardAccess")
+          );
+
+          if (myWhiteboardAccess) {
+            if (myWhiteboardAccess.includes(data.conversationId)) {
+              setAlertMessage(
+                "The Admin just restricted you from sharing the whiteboard."
+              );
+              setShowAlert(true);
+              const newWhiteboardAccess = myWhiteboardAccess.filter(
+                (theConversationId) => theConversationId !== data.conversationId
+              );
+
+              window.localStorage.setItem(
+                "myWhiteboardAccess",
+                JSON.stringify(newWhiteboardAccess)
+              );
+            }
+          }
+        }
+      });
+
+    socket.off("code_from_editor").on("code_from_editor", (data) => {
+      setCode(data.code);
+    });
+    socket
+      .off("change_programming_language")
+      .on("change_programming_language", (data) => {
+        setLanguage(data.language);
+      });
   }, []);
 
   return (
@@ -385,6 +499,10 @@ function Container({ setShowMobileChat, roomData }) {
           canvasData,
           newPath,
           clearTheCanvas,
+          code,
+          setCode,
+          language,
+          setLanguage,
         }}
       />
     </>
