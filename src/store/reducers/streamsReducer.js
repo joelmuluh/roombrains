@@ -14,12 +14,6 @@ const initialState = {
   ],
   streams: [],
   streamers: [],
-  participation: [
-    {
-      conversationId: null,
-      participants: [],
-    },
-  ],
   socket: io(`${process.env.REACT_APP_API}`, connectionOptions),
 };
 
@@ -34,6 +28,22 @@ export const streamReducer = (state = initialState, action) => {
         ...state,
         streams: [...state.streams, action.payload],
       };
+    case "ADD_CALL_HANDLER":
+      const callStream = state.streams.find(
+        (stream) =>
+          stream._id === action.payload._id &&
+          stream.conversationId === action.payload.conversationId
+      );
+      if (callStream) {
+        const newCallStream = { ...callStream, call: action.payload.call };
+        const newStreams = state.streams.filter(
+          (stream) =>
+            stream._id !== action.payload._id &&
+            stream.conversationId === action.payload.conversationId
+        );
+        return { ...state, streams: [...newStreams, newCallStream] };
+      } else return state;
+
     case "REMOVE_STREAM":
       const myStream = state.streams.find(
         (stream) =>
@@ -44,6 +54,11 @@ export const streamReducer = (state = initialState, action) => {
         myStream?.stream?.getTracks().forEach((track) => {
           track.stop();
         });
+        if (action.payload._id === action.payload.myId) {
+          myStream.call.peerConnection.getSenders().forEach((sender) => {
+            sender.track.stop();
+          });
+        }
         const newStreams = state.streams.filter(
           (stream) =>
             stream._id !== action.payload._id &&

@@ -11,6 +11,7 @@ import validator from "validator";
 import Alert from "../components/Alert";
 import { FcPlus } from "react-icons/fc";
 import Loader from "../components/Loader";
+import Header from "../components/Header";
 
 function Profile() {
   const [showUsername, setShowUsername] = useState(false);
@@ -53,14 +54,13 @@ function Profile() {
             },
           }
         );
-        console.log(response.data);
 
         dispatch({
           type: "UPDATE_DETAIL",
           payload: response.data,
         });
       } catch (error) {
-        console.log({ stuff: error });
+        console.log(error.message);
       }
     };
   };
@@ -68,11 +68,14 @@ function Profile() {
   useEffect(() => {
     if (!user.token) {
       navigate("/login");
+    } else {
+      document.title = user.username;
     }
   }, []);
 
   return (
-    <div className="profile-container pb-[2rem] lg:pb-[5rem] h-[120vh] bg-[#1F1F1F] text-white">
+    <div className="profile-container overflow-y-auto pb-[2rem] lg:pb-[5rem] h-[100vh] bg-[#1F1F1F] text-white">
+      <Header />
       <div className="w-[100%] md:max-w-[600px] lg:max-w-[800px] mx-auto profile-width">
         <div className="pt-[2.5rem]">
           <h1 className="account-header mb-[1.5rem] px-[1rem] lg:px-0 lg:mb-[3rem] font-[400] text-[1.2rem] lg:text-[2rem]">

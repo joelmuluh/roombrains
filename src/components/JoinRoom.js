@@ -13,8 +13,8 @@ function JoinRoom({ setShowJoinRoom }) {
   const [roomData, setRoomData] = useState("");
   const user = useSelector((state) => state.user);
   const { username } = user;
-  const navigate = useNavigate();
   const firstName = username.includes(" ") ? username.split(" ")[0] : username;
+  const navigate = useNavigate();
   const join = () => {
     if (meetingId.trim().length > 0) {
       navigate(`/rooms/${meetingId}`);
@@ -51,7 +51,7 @@ function JoinRoom({ setShowJoinRoom }) {
   };
   return (
     <div className="fixed z-[10] top-0 bottom-0 left-0 right-0 bg-[#1F1F1F] scale-in text-black flex items-center lg:block">
-      <div className=" mt-[1.5rem] lg:mt-[2.5rem] max-w-[800px] mx-auto lg:mt-[4rem">
+      <div className=" mt-[1.5rem] lg:mt-[2.5rem] max-w-[800px] w-[80%] mx-auto lg:mt-[4rem">
         <div className="flex lg:mb-[2rem] lg:mb-[3rem] lg:block justify-between items-center px-[1rem] lg:px-0 pb-[1rem]">
           <h1 className="  font-[400] text-[1rem] lg:text-[1.5rem] lg:text-[2rem] text-white">
             Join Room
@@ -138,7 +138,7 @@ function JoinRoom({ setShowJoinRoom }) {
             {meetingId.length > 0 && (
               <button
                 onClick={() => verify()}
-                className="bg-transparent text-[#1492E6] text-[1rem] font-semibold"
+                className="bg-transparent text-[#1492E6] text-[14px] lg:text-[1rem] font-semibold"
               >
                 VERIFY
               </button>

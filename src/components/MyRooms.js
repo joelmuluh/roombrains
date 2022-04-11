@@ -44,7 +44,11 @@ function MyRooms() {
         rooms.map((data, index) => <MyRoom key={index} data={data} />)
       ) : (
         <div className="flex justify-center items-center mt-[5rem] text-[1rem]">
-          You currently don't have any room {firstName}
+          {!loading ? (
+            `You currently don't have any room ${firstName}`
+          ) : (
+            <i>Getting your Rooms...</i>
+          )}
         </div>
       )}
       {loading && (

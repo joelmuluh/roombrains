@@ -15,12 +15,14 @@ function ChatPopup({
   setAlertMessage,
   setShowMobileChat,
   setShowPopup,
+  setBlocked,
 }) {
   const user = useSelector((state) => state.user);
   const streamsData = useSelector((state) => state.streams);
   const socket = useSelector((state) => state.streams.socket);
 
   const blockMember = async () => {
+    setBlocked(true);
     socket.emit("block-user", { conversationId, _id: _id });
     try {
       const response = await axios.delete(
@@ -40,22 +42,6 @@ function ChatPopup({
         setAlertMessage(`${username} has been blocked`);
         setShowAlert(true);
       }
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-  const unblockMember = async () => {
-    try {
-      const response = await axios.delete(
-        `${process.env.REACT_APP_API}/room/unblock/${roomData._id}/${_id}`,
-        {
-          headers: {
-            authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
-
-      console.log(response.data);
     } catch (error) {
       console.log(error.message);
     }

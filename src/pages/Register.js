@@ -1,9 +1,10 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BiShow } from "react-icons/bi";
 import { BiHide } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
 import validator from "validator";
+import Header from "../components/Header";
 import Loader from "../components/Loader";
 function Register() {
   const [username, setUsername] = useState("");
@@ -59,8 +60,11 @@ function Register() {
       setFilled(false);
     }
   };
+  useEffect(() => {
+    document.title = "Roombrains | Register";
+  }, []);
   return (
-    <div className="h-[100vh] bg-[#1C1C1C] px-[1rem]">
+    <div className="h-[100vh] lg:overflow-y-auto bg-[#1C1C1C] ">
       {loading && (
         <div
           style={{ transform: "translateX(-50%)" }}
@@ -69,7 +73,8 @@ function Register() {
           <Loader />
         </div>
       )}
-      <div className="h-full flex flex-col items-center pt-[2.5rem] lg:pt-[7%]">
+      <Header />
+      <div className="h-full px-[1rem] flex flex-col items-center pt-[2.5rem] lg:pt-[7%]">
         <h1 className="mb-[2rem]  text-white font-semibold text-[2rem]">
           Register for Free
         </h1>

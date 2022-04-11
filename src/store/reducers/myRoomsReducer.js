@@ -15,7 +15,6 @@ export const myRoomsReducer = (state = initialState, action) => {
       return { myRooms: newRooms };
     case "DELETE_ALL_ROOMS":
       return { myRooms: null };
-      return state;
     default:
       return state;
   }

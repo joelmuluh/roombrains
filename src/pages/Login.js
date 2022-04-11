@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login } from "../store/actions/login";
 import validator from "validator";
 import Loader from "../components/Loader";
+import Header from "../components/Header";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +20,7 @@ function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+  const { intended_room } = useSelector((state) => state.meeting);
 
   const handleForm = async () => {
     if (email.trim().length > 0 && password.trim().length > 0) {
@@ -51,8 +53,12 @@ function Login() {
                   data.image
                 )
               );
-              console.log(user);
-              navigate("/profile");
+
+              if (intended_room) {
+                navigate(`/rooms/${intended_room}`);
+              } else {
+                navigate("/profile");
+              }
             }
           }
         } catch (error) {
@@ -66,8 +72,12 @@ function Login() {
       setFilled(false);
     }
   };
+
+  useEffect(() => {
+    document.title = "Roombrains | login";
+  }, []);
   return (
-    <div className="h-[100vh] bg-[#1C1C1C] px-[1rem]">
+    <div className="h-[100vh] lg:overflow-y-auto bg-[#1C1C1C]">
       {loading && (
         <div
           style={{ transform: "translateX(-50%)" }}
@@ -76,7 +86,8 @@ function Login() {
           <Loader />
         </div>
       )}
-      <div className="h-full flex flex-col items-center pt-[2.5rem] lg:pt-[7%]">
+      <Header />
+      <div className="h-full px-[1rem] flex flex-col items-center pt-[2.5rem] lg:pt-[7%]">
         <h1 className="mb-[2rem] text-white font-semibold text-[2rem]">
           Login
         </h1>

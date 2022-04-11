@@ -1,5 +1,5 @@
 import { AiOutlineHome } from "react-icons/ai";
-import { RiEditBoxLine } from "react-icons/ri";
+import { HiCode } from "react-icons/hi";
 import { VscEditorLayout } from "react-icons/vsc";
 import { BiMessageRoundedEdit } from "react-icons/bi";
 import { GrUndo } from "react-icons/gr";
@@ -12,7 +12,7 @@ export const links = [
   },
   {
     text: " Editor",
-    icon: <RiEditBoxLine className="text-[18px] lg:text-[25px]" />,
+    icon: <HiCode className="text-[18px] lg:text-[25px]" />,
     url: "editor",
   },
   {

@@ -11,14 +11,16 @@ function UnblockPopup({
   roomData,
   setAlertMessage,
   setShowAlert,
+  setBlocked,
 }) {
   const user = useSelector((state) => state.user);
   const streamsData = useSelector((state) => state.streams);
   const socket = useSelector((state) => state.streams.socket);
 
   const unblockMember = async () => {
+    setBlocked(false);
     try {
-      const response = await axios.delete(
+      await axios.delete(
         `${process.env.REACT_APP_API}/room/unblock/${roomData._id}/${_id}`,
         {
           headers: {
@@ -26,8 +28,6 @@ function UnblockPopup({
           },
         }
       );
-
-      console.log(response.data);
     } catch (error) {
       console.log(error.message);
     }

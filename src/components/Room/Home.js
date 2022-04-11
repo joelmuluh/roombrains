@@ -6,9 +6,11 @@ import { BsMicMuteFill } from "react-icons/bs";
 import { BsFillMicFill } from "react-icons/bs";
 import { BsCameraVideoFill } from "react-icons/bs";
 import { BsFillCameraVideoOffFill } from "react-icons/bs";
+import { BsShareFill } from "react-icons/bs";
 import { ImExit } from "react-icons/im";
 import Avatar from "@mui/material/Avatar";
 import { useDispatch, useSelector } from "react-redux";
+import { getDisplayMedia, getStream } from "../../functions/getStream";
 function Home() {
   const {
     Invitation,
@@ -35,7 +37,7 @@ function Home() {
   const [showControlsPopup, setShowControlsPopup] = useState(false);
 
   return (
-    <div className="lg:px-[1.5rem] w-full h-full">
+    <div className=" px-[1rem] lg:px-[1.5rem] w-full h-full">
       <div className="pb-[1rem] border-b border-[rgba(255,255,255,0.1)]">
         <h1 className="font-bold text-[1rem] lg:text-[1.5rem]  text-center">
           {roomData?.name}
@@ -59,6 +61,9 @@ function Home() {
                 setShowControlsPopup={setShowControlsPopup}
                 conversationId={roomData.conversationId}
                 roomData={roomData}
+                peer={peer}
+                streamsData={streamsData}
+                user={user}
               />
             ))}
         </div>
@@ -75,7 +80,7 @@ function Home() {
               No one is doing a video stream. The executive president(admin) of
               this room,{" "}
               <span className="font-semibold">{roomData?.creatorName}</span>,
-              has not give permissions.
+              has not given permissions.
             </p>
           )}
         </div>
@@ -108,14 +113,16 @@ const Stream = ({
   setShowControlsPopup,
   conversationId,
   roomData,
+  streamsData,
+  user,
 }) => {
   const streamRef = useRef();
   const dispatch = useDispatch();
   const [mute, setMute] = useState(false);
   const [generalMute, setGeneralMute] = useState(false);
   const [enableVideo, setEnableVideo] = useState(true);
+  const [sharingScreen, setSharingScreen] = useState(false);
   const socket = useSelector((state) => state.streams.socket);
-  const user = useSelector((state) => state.user);
   useEffect(() => {
     if (streamRef) {
       streamRef.current.srcObject = stream;
@@ -132,6 +139,7 @@ const Stream = ({
         _id,
       },
     });
+    setShowControlsPopup(false);
   };
   const unMuteUser = () => {
     setMute(false);
@@ -142,6 +150,7 @@ const Stream = ({
         _id,
       },
     });
+    setShowControlsPopup(false);
   };
   const enableVideoChat = () => {
     setEnableVideo(true);
@@ -152,6 +161,7 @@ const Stream = ({
         _id,
       },
     });
+    setShowControlsPopup(false);
   };
   const disableVideoChat = () => {
     setEnableVideo(false);
@@ -162,6 +172,7 @@ const Stream = ({
         _id,
       },
     });
+    setShowControlsPopup(false);
   };
 
   const leaveChat = () => {
@@ -170,6 +181,7 @@ const Stream = ({
       payload: {
         conversationId,
         _id,
+        myId: user._id,
       },
     });
     dispatch({
@@ -206,6 +218,7 @@ const Stream = ({
       conversationId,
       _id,
     });
+    setShowControlsPopup(false);
   };
   const unMuteForEveryone = () => {
     setGeneralMute(false);
@@ -220,6 +233,7 @@ const Stream = ({
       conversationId,
       _id,
     });
+    setShowControlsPopup(false);
   };
 
   const removeFromChat = () => {
@@ -244,6 +258,88 @@ const Stream = ({
     });
     setShowControlsPopup(false);
   };
+
+  const shareScreen = async () => {
+    const screen = await getDisplayMedia();
+    streamRef.current.srcObject = screen;
+    setSharingScreen(true);
+    setShowControlsPopup(false);
+    const normalVideo = streamsData.streams.find(
+      (stream) => stream._id === _id && stream.conversationId === conversationId
+    );
+    const screenTrack = screen.getVideoTracks()[0];
+    normalVideo.call.peerConnection.getSenders().forEach((sender) => {
+      if (sender.track.kind === "video") {
+        sender.replaceTrack(screenTrack);
+      }
+    });
+
+    screenTrack.onended = () => {
+      normalVideo.call.peerConnection.getSenders().forEach((sender) => {
+        if (sender.track.kind === "video") {
+          streamRef.current.srcObject = normalVideo.stream;
+          sender.replaceTrack(normalVideo.stream.getVideoTracks()[0]);
+        }
+      });
+      setSharingScreen(false);
+    };
+  };
+
+  const quitScreenShare = () => {
+    const normalVideo = streamsData.streams.find(
+      (stream) => stream._id === _id && stream.conversationId === conversationId
+    );
+    streamRef.current.srcObject = normalVideo.stream;
+    normalVideo.call.peerConnection.getSenders().forEach((sender) => {
+      if (sender.track.kind === "video") {
+        sender.replaceTrack(normalVideo.stream.getVideoTracks()[0]);
+      }
+    });
+
+    setSharingScreen(false);
+    setShowControlsPopup(false);
+  };
+  useEffect(() => {
+    const localStream = streamsData.streams.find(
+      (stream) =>
+        stream._id === user._id &&
+        stream.conversationId === roomData?.conversationId
+    );
+    if (localStream) {
+      localStream.stream.oninactive = () => {
+        dispatch({
+          type: "REMOVE_STREAM",
+          payload: {
+            conversationId,
+            _id,
+          },
+        });
+
+        const payload = {
+          _id,
+          conversationId,
+        };
+
+        dispatch({
+          type: "QUIT_SCREEN_SHARE",
+          payload,
+        });
+        setSharingScreen(false);
+      };
+      localStream.stream.onended = () => {
+        const payload = {
+          _id,
+          conversationId,
+        };
+
+        dispatch({
+          type: "QUIT_SCREEN_SHARE",
+          payload,
+        });
+        setSharingScreen(false);
+      };
+    }
+  }, [streamsData.streams]);
 
   return (
     <>
@@ -358,15 +454,38 @@ const Stream = ({
                   )}
 
                   {_id === user._id && (
-                    <div
-                      onClick={() => leaveChat()}
-                      className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
-                    >
-                      <ImExit className="text-20px" />
-                      <p className="text-[14px] lg:text-[16px] cursor-pointer">
-                        Leave Chat
-                      </p>
-                    </div>
+                    <>
+                      {!sharingScreen ? (
+                        <div
+                          onClick={() => shareScreen()}
+                          className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
+                        >
+                          <BsShareFill className="text-20px" />
+                          <p className="text-[14px] lg:text-[16px] cursor-pointer">
+                            share screen
+                          </p>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={() => quitScreenShare()}
+                          className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
+                        >
+                          <BsShareFill className="text-20px" />
+                          <p className="text-[14px] lg:text-[16px] cursor-pointer">
+                            Stop ScreenShare
+                          </p>
+                        </div>
+                      )}
+                      <div
+                        onClick={() => leaveChat()}
+                        className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
+                      >
+                        <ImExit className="text-20px" />
+                        <p className="text-[14px] lg:text-[16px] cursor-pointer">
+                          Leave Chat
+                        </p>
+                      </div>
+                    </>
                   )}
 
                   {roomData.creator === user._id && roomData.creator !== _id && (

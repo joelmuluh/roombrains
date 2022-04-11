@@ -9,6 +9,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Main from "./pages/Main";
+import PageNotFound from "./pages/PageNotFound";
+import UserBlocked from "./pages/UserBlocked";
 function App() {
   return (
     <Routes>
@@ -23,6 +25,8 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="*" element={<PageNotFound />} />
+      <Route path="/room/blocked" element={<UserBlocked />} />
     </Routes>
   );
 }

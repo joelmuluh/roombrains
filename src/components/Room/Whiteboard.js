@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { Button } from "@mui/material";
 import { useOutletContext } from "react-router-dom";
 function WhiteBoard() {
   const {
@@ -21,6 +22,9 @@ function WhiteBoard() {
     socket,
     roomData,
     dispatch,
+    canvasData,
+    newPath,
+    clearTheCanvas,
   } = useOutletContext();
   const [coordinates, setCoordinates] = useState(null);
   const container = useRef();
@@ -36,15 +40,30 @@ function WhiteBoard() {
     canvasApi.height = container.current.clientHeight;
     canvasApi.width = container.current.clientWidth;
     const CanvasContent = canvasApi.getContext("2d");
-    const rect = canvasApi.getBoundingClientRect();
+    const rect = container.current.getBoundingClientRect();
     CanvasContent.translate(-rect.x, -rect.y);
     setContext(CanvasContent);
   }, []);
-
+  window.addEventListener("resize", () => {
+    const image = context.getImageData(
+      0,
+      0,
+      container.current.clientWidth,
+      container.current.clientHeight
+    );
+    context.putImageData(image, 0, 0);
+    const rect = container.current.getBoundingClientRect();
+    context.translate(-rect.x, -rect.y);
+  });
   const mouseDown = () => {
     setDrawing(true);
     context.beginPath();
     setCoordinates(null);
+    socket.emit("begin-new-mouse-path", {
+      conversationId: roomData.conversationId,
+      lineWidth,
+      color,
+    });
   };
   const mouseUp = () => {
     setDrawing(false);
@@ -58,33 +77,90 @@ function WhiteBoard() {
       });
       context.strokeStyle = color;
       context.lineWidth = lineWidth;
-      context.lineTo(coordinates.x, coordinates.y);
+      context.lineTo(coordinates?.x, coordinates?.y);
 
       context.stroke();
+
+      const xValue =
+        ((e.clientX - container.current.getBoundingClientRect().x) /
+          container.current.clientWidth) *
+        100;
+
+      const yValue =
+        ((e.clientY - container.current.getBoundingClientRect().y) /
+          container.current.clientHeight) *
+        100;
       const canvasData = {
-        x: e.clientX,
-        y: e.clientY,
+        x: xValue,
+        y: yValue,
       };
       socket.emit("canvasData", {
         conversationId: roomData.conversationId,
         canvasData,
+        lineWidth,
+        color,
       });
     } else return;
   };
 
-  const touchStart = (e) => {};
-  const touchEnd = (e) => {};
-  const touchMove = (e) => {};
+  const touchStart = (e) => {
+    setDrawing(true);
+    context.beginPath();
+    setCoordinates(null);
+    socket.emit("begin-new-mouse-path", {
+      conversationId: roomData.conversationId,
+      lineWidth,
+      color,
+    });
+  };
+  const touchEnd = (e) => {
+    setDrawing(false);
+    context.beginPath();
+  };
+  const touchMove = (e) => {
+    if (drawing) {
+      setCoordinates({
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      });
+      context.strokeStyle = color;
+      context.lineWidth = lineWidth;
+      context.lineTo(coordinates?.x, coordinates?.y);
 
-  const clearCanvas = () => {
+      context.stroke();
+      const xValue =
+        ((e.touches[0].clientX - container.current.getBoundingClientRect().x) /
+          container.current.clientWidth) *
+        100;
+      const yValue =
+        ((e.touches[0].clientY - container.current.getBoundingClientRect().y) /
+          container.current.clientHeight) *
+        100;
+      const canvasData = {
+        x: xValue,
+        y: yValue,
+      };
+      socket.emit("canvasData", {
+        conversationId: roomData.conversationId,
+        canvasData,
+        lineWidth,
+        color,
+      });
+    } else return;
+  };
+
+  const clear = () => {
     context.save();
-
-    // Use the identity matrix while clearing the canvas
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Restore the transform
     context.restore();
+  };
+
+  const clearCanvas = () => {
+    clear();
+    socket.emit("clear-canvas", {
+      conversationId: roomData.conversationId,
+    });
   };
 
   const Eraser = () => {
@@ -98,40 +174,127 @@ function WhiteBoard() {
     }
   };
 
-  socket.off("canvasData").on("canvasData", (data) => {
-    setCoordinates({
-      x: data.canvasData.x,
-      y: data.canvasData.y,
-    });
+  useEffect(() => {
+    if (canvasData) {
+      if (context) {
+        context.strokeStyle = canvasData.color;
+        context.lineWidth = canvasData.lineWidth;
+        const xValue =
+          (canvasData.canvasData?.x * container.current.clientWidth) / 100;
+        const yValue =
+          (canvasData.canvasData?.y * container.current.clientHeight) / 100;
+        setCoordinates({
+          x: xValue + container.current.getBoundingClientRect().x,
+          y: yValue + container.current.getBoundingClientRect().y,
+        });
 
-    context.lineTo(data.canvasData.x, data.canvasData.y);
-    context.stroke();
-    setCoordinates(null);
-  });
+        context.lineTo(
+          xValue + container.current.getBoundingClientRect().x,
+          yValue + container.current.getBoundingClientRect().y
+        );
+        context.stroke();
+      }
+    }
+  }, [canvasData]);
+  useEffect(() => {
+    if (clearTheCanvas !== 0) {
+      if (context) {
+        clear();
+      }
+    }
+  }, [clearTheCanvas]);
+  useEffect(() => {
+    if (newPath !== 0) {
+      if (context) {
+        context.beginPath();
+      }
+    }
+  }, [newPath]);
+  // useEffect(() => {
+  //   socket.emit("ask_canvas_image_data", {
+  //     conversationId: roomData.conversationId,
+  //     _id: user._id,
+  //   });
+  // }, []);
+
+  // socket.off("ask_canvas_image_data").on("ask_canvas_image_data", (data) => {
+  //   if (context) {
+  //     console.log("Sent the data");
+  //     socket.emit("Get_canvas_image_data", {
+  //       conversationId: roomData.conversationId,
+  //       recipient: data._id,
+  //       imageData: context.getImageData(
+  //         0,
+  //         0,
+  //         container.current.clientWidth,
+  //         container.current.clientHeight
+  //       ),
+  //     });
+  //   }
+  // });
+
+  // socket.off("Get_canvas_image_data").on("Get_canvas_image_data", (data) => {
+  //   console.log("got the data");
+  //   if (context) {
+  //     if (data.recipient === user._id) {
+  //       context.putImageData(data.imageData, 0, 0);
+  //     }
+  //   }
+  // });
+
   return (
-    <div className="h-full ">
-      <div className="pb-[1rem] border-b border-[rgba(255,255,255,0.1)]">
-        <h1 className="font-bold text-[1rem] lg:text-[1.5rem]  text-center">
-          {roomData.name}
-        </h1>
+    <div className="h-full overflow-y-hidden">
+      <div className="sticky top-0 x-0 w-full bg-[#1F1F1F] px-[1rem]">
+        {streamsData.streams.length > 0 && (
+          <div className="py-[0.8rem] small-video-wrapper gap-[1rem] ">
+            {streamsData?.streams
+              ?.filter(
+                (stream) => stream.conversationId === roomData.conversationId
+              )
+              .map((streamData) => (
+                <Stream
+                  key={streamData._id}
+                  _id={streamData._id}
+                  stream={streamData?.stream}
+                  image={streamData.image}
+                  username={streamData.username}
+                  conversationId={roomData.conversationId}
+                  streamsData={streamsData}
+                />
+              ))}
+          </div>
+        )}
+        <div className="flex justify-between text-[13px] lg:text-[15px]">
+          {/* <button
+            onClick={() => clearCanvas()}
+            className="text-white w-[90px] h-[30px] lg:w-[100px] lg:h-[40px] bg-red-400"
+          >
+            Clear page
+          </button> */}
+          <Button
+            variant="contained"
+            onClick={() => clearCanvas()}
+            className="text-white w-[90px] h-[30px] lg:w-[100px] lg:h-[40px] bg-red-400"
+            sx={{
+              backgroundColor: "tomato",
+              color: "white",
+              width: "90px",
+              height: "40px",
+            }}
+          >
+            clear
+          </Button>
+          <button
+            onClick={() => Eraser()}
+            className={`text-white w-[90px] h-[30px] lg:w-[100px] lg:h-[40px] ${
+              eraserActive ? "bg-[red]" : "bg-blue-600"
+            } transition duration-200 `}
+          >
+            Eraser
+          </button>
+        </div>
       </div>
-      <div className="flex justify-between ">
-        <button
-          onClick={() => clearCanvas()}
-          className="text-white w-[100px] h-[40px] bg-red-400"
-        >
-          Clear page
-        </button>
-        <button
-          onClick={() => Eraser()}
-          className={`text-white w-[100px] h-[40px] ${
-            eraserActive ? "bg-[black]" : "bg-blue-400"
-          } transition duration-200 `}
-        >
-          Eraser
-        </button>
-      </div>
-      <div ref={container} className="h-full w-full overflow-y-auto">
+      <div ref={container} className="h-full w-full">
         <canvas
           ref={canvasRef}
           onMouseDown={(e) => mouseDown(e)}
@@ -162,3 +325,14 @@ function WhiteBoard() {
 }
 
 export default WhiteBoard;
+
+const Stream = ({ stream }) => {
+  const streamRef = useRef();
+  useEffect(() => {
+    if (streamRef) {
+      streamRef.current.srcObject = stream;
+      streamRef.current.play();
+    }
+  }, []);
+  return <video className="w-[60px] md:w-[100px]" ref={streamRef} autoPlay />;
+};

@@ -35,7 +35,7 @@ function Settings() {
   const [filled, setFilled] = useState(true);
   const [loading, setLoading] = useState(false);
   const [generateNewId, setGenerateNewId] = useState(false);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(roomData?.description);
   const copyToClipboard = () => {
     copy(`https://www.roombrains.com/rooms/${roomData.meetingId}`);
     setAlertMessage("Link has been copied to clipboard");
@@ -110,7 +110,7 @@ function Settings() {
     });
   }, []);
   return (
-    <div className="h-full">
+    <div className="h-full px-[1rem]">
       {showAlert && <Alert text={alertMessage} setShowAlert={setShowAlert} />}
       {loading && (
         <div

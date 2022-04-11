@@ -34,6 +34,7 @@ function Room() {
     port: "5000",
   });
   const getRoom = async () => {
+    dispatch({ type: "GET_PEER", payload: peer });
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/room/${meetingId}`,
@@ -44,42 +45,49 @@ function Room() {
         }
       );
 
-      if (
-        response.data.exists &&
-        !response.data.roomData.blocked.includes(user._id)
-      ) {
-        setRoomData(response.data.roomData);
-        socket.emit("addUser", userId);
-        socket.emit("join-conversation", {
-          conversationId: response.data.roomData.conversationId,
-          userId,
-          username,
-        });
-        dispatch({
-          type: "INITIAL_STREAMERS",
-          payload: response.data.roomData.conversationId,
-        });
-
-        peer.on("open", (id) => {
-          socket.emit("new-connection", {
+      if (response.data.exists) {
+        if (!response.data.roomData.blocked.includes(user._id)) {
+          setRoomData(response.data.roomData);
+          document.title = response.data.roomData.name;
+          socket.emit("addUser", userId);
+          socket.emit("join-conversation", {
             conversationId: response.data.roomData.conversationId,
-            _id: user._id,
+            userId,
             username,
-            peerId: id,
-            image: user.image,
           });
-        });
-        if (response.data.roomData.creator === user._id) {
           dispatch({
-            type: "INITIAL_STREAMING_STATE",
+            type: "INITIAL_STREAMERS",
             payload: response.data.roomData.conversationId,
           });
-        }
 
-        setLoading(false);
-        navigate("home");
+          peer.on("open", (id) => {
+            socket.emit("new-connection", {
+              conversationId: response.data.roomData.conversationId,
+              _id: user._id,
+              username,
+              peerId: id,
+              image: user.image,
+            });
+          });
+          if (response.data.roomData.creator === user._id) {
+            dispatch({
+              type: "INITIAL_STREAMING_STATE",
+              payload: response.data.roomData.conversationId,
+            });
+          } else {
+          }
+
+          setLoading(false);
+          navigate("home");
+        } else {
+          dispatch({
+            type: "SET_BLOCKED_INFO",
+            payload: response.data.roomData.creatorName,
+          });
+          navigate("/room/blocked");
+        }
       } else {
-        alert("Doesn't exist");
+        navigate("*");
       }
     } catch (error) {
       console.log(error);
@@ -87,10 +95,11 @@ function Room() {
   };
   useEffect(() => {
     if (!user?.token) {
+      dispatch({ type: "SAVE_INTENTED_ROOM", payload: meetingId });
       navigate("/login");
     } else {
-      dispatch({ type: "GET_PEER", payload: peer });
       getRoom();
+      dispatch({ type: "REMOVE_INTENTED_ROOM" });
     }
   }, [user, meetingId, userId, username]);
 
@@ -104,10 +113,10 @@ function Room() {
           <Loader />
         </div>
       ) : (
-        <div className="h-[100vh]  room-container flex-col md-flex-row text-white">
-          <div className="flex room-container h-full bg-[#1C1C1C]">
+        <div className="h-[100vh] text-white">
+          <div className="flex h-full bg-[#1C1C1C]">
             <div className="bg-[#1C1C1C] hidden show-nav h-[50px] w-full fixed flex justify-between items-center">
-              {!showMobileChat && (
+              {!showSidebar && (
                 <div
                   className={`z-[2] xl:hidden absolute top-[0.7rem] left-[1rem]`}
                 >
@@ -141,7 +150,7 @@ function Room() {
               setShowSidebar={setShowSidebar}
               showSidebar={showSidebar}
             />
-            <div className="flex-1 xl:flex-[0.75] outlet pt-[3rem]  px-[1rem] xl:p-[1rem] xl:mt-0 xl:flex-[0.55] bg-[#1C1C1C] h-full overflow-y-auto ">
+            <div className="xl:flex-[0.55] flex-1 pt-[3rem] xl:py-[1rem] xl:mt-0 bg-[#1C1C1C] h-full overflow-y-auto overflow-x-hidden">
               <Container
                 roomData={roomData}
                 setShowMobileChat={setShowMobileChat}

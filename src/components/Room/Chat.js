@@ -7,7 +7,6 @@ import { IoMdSend } from "react-icons/io";
 import { VscChromeClose } from "react-icons/vsc";
 import { AiOutlineCaretLeft } from "react-icons/ai";
 import { AiOutlineCaretRight } from "react-icons/ai";
-import { IoIosVideocam } from "react-icons/io";
 import { ImBlocked } from "react-icons/im";
 import { useSelector } from "react-redux";
 import Picker from "emoji-picker-react";
@@ -163,9 +162,9 @@ function Chat({
 
   return (
     <div
-      className={`chat-bar relative ${
+      className={`chat-bar relative z-[100] ${
         showMobileChat ? "show-mobile-chat" : "hide-mobile-chat"
-      } flex-[0.25] bg-[#1F1F1F] h-full text-white flex flex-col`}
+      }  flex-[0.25] bg-[#1F1F1F] h-full text-white flex flex-col`}
     >
       <div
         className={`relative py-[1.5rem] border-b border-[rgba(255,255,255,0.2)] mb-[1rem] h-[7%] ${
@@ -305,6 +304,7 @@ const ChatMessage = ({
   const scrollDown = useRef();
   const [showChatPopup, setShowChatPopup] = useState(false);
   const [showUnblockPopup, setShowUnblockPopup] = useState(false);
+  const [blocked, setBlocked] = useState(false);
 
   const user = useSelector((state) => state.user);
   useEffect(() => {
@@ -312,11 +312,7 @@ const ChatMessage = ({
   }, [messages]);
 
   return (
-    <div
-      className=""
-      ref={scrollDown}
-      // className={`${senderId === userId && "bg-[#545454] py-[10px]"}`}
-    >
+    <div className="w-full h-full" ref={scrollDown}>
       <div className="px-[1rem] flex">
         <Avatar
           alt={senderName}
@@ -335,7 +331,7 @@ const ChatMessage = ({
         </div>
         {roomData.creator === user._id && senderId !== user._id && (
           <>
-            {roomData.blocked.includes(senderId) ? (
+            {roomData.blocked.includes(senderId) || blocked ? (
               <ImBlocked
                 className="text-20px text-red-900"
                 onClick={() => setShowUnblockPopup(true)}
@@ -362,6 +358,7 @@ const ChatMessage = ({
           roomData={roomData}
           setShowPopup={setShowChatPopup}
           setShowMobileChat={setShowMobileChat}
+          setBlocked={setBlocked}
         />
       )}
       {showUnblockPopup && (
@@ -373,6 +370,7 @@ const ChatMessage = ({
           roomData={roomData}
           setAlertMessage={setAlertMessage}
           setShowAlert={setShowAlert}
+          setBlocked={setBlocked}
         />
       )}
     </div>

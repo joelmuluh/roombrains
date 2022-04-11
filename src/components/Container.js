@@ -11,6 +11,9 @@ function Container({ setShowMobileChat, roomData }) {
   const [adminName, setAdminName] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [showAlert, setShowAlert] = useState(false);
+  const [canvasData, setCanvasData] = useState(null);
+  const [clearTheCanvas, setClearTheCanvas] = useState(0);
+  const [newPath, setNewPath] = useState(0);
   const peer = meeting.peer;
   const streamsData = useSelector((state) => state.streams);
   const socket = streamsData.socket;
@@ -183,11 +186,19 @@ function Container({ setShowMobileChat, roomData }) {
             stream._id === user._id &&
             stream.conversationId === roomData?.conversationId
         );
-        peer?.call(data.peerId, localStream?.stream, {
+        const call = peer?.call(data.peerId, localStream?.stream, {
           metadata: {
             _id: user._id,
             image: user.image,
             username: user.username,
+          },
+        });
+        dispatch({
+          type: "ADD_CALL_HANDLER",
+          payload: {
+            conversationId: roomData.conversationId,
+            _id: user._id,
+            call,
           },
         });
       }
@@ -220,11 +231,20 @@ function Container({ setShowMobileChat, roomData }) {
         },
       });
 
-      peer.call(data.peerId, localstream.stream, {
+      const call = peer.call(data.peerId, localstream.stream, {
         metadata: {
           _id: user._id,
           image: user.image,
           username: user.username,
+        },
+      });
+
+      dispatch({
+        type: "ADD_CALL_HANDLER",
+        payload: {
+          conversationId: roomData.conversationId,
+          _id: user._id,
+          call,
         },
       });
     }
@@ -323,6 +343,22 @@ function Container({ setShowMobileChat, roomData }) {
     }
   });
 
+  useEffect(() => {
+    socket.off("canvasData").on("canvasData", (data) => {
+      if (data.canvasData) {
+        setCanvasData(data);
+      }
+    });
+
+    socket.off("clear-canvas").on("clear-canvas", () => {
+      setClearTheCanvas((prev) => prev + 1);
+    });
+
+    socket.off("begin-new-mouse-path").on("begin-new-mouse-path", (data) => {
+      setNewPath((prev) => prev + 1);
+    });
+  }, []);
+
   return (
     <>
       <Outlet
@@ -346,6 +382,9 @@ function Container({ setShowMobileChat, roomData }) {
           navigate,
           Alert,
           Invitation,
+          canvasData,
+          newPath,
+          clearTheCanvas,
         }}
       />
     </>

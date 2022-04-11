@@ -7,11 +7,10 @@ import { BsThreeDots } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { getStream } from "../../functions/getStream";
 import { links } from "../../utils/sidelinks";
-import Avatar from "@mui/material/Avatar";
-import { IoIosVideocam } from "react-icons/io";
-import { ImBlocked } from "react-icons/im";
 import axios from "axios";
 import Alert from "../Alert";
+import ChatPopup from "../ChatPopup";
+import UnblockPopup from "../UnblockPopup";
 function Siderbar({ roomData, showSidebar, setShowSidebar }) {
   const socket = useSelector((state) => state.streams.socket);
   const [participants, setParticipants] = useState([]);
@@ -102,9 +101,9 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
 
   return (
     <div
-      className={`xl:flex-[0.2] ${
+      className={`flex-[0.2] ${
         showSidebar ? "show-sidebar" : "hide-sidebar"
-      } xl:translate-x-0 xl:block xl:static bg-[#1F1F1F] h-full `}
+      } xl:block xl:static h-full bg-[#1F1F1F] `}
     >
       <VscChromeClose
         onClick={() => setShowSidebar(false)}
@@ -192,10 +191,9 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
             onClick={() => setChevronDown((prev) => !prev)}
             size={25}
           />
-          {/* <div></div> show list of participants and buttons for admin to operate on them */}
         </div>
         {chevronDown && (
-          <div className="mt-[0.6rem] space-y-[0.9rem] h-[250px] overflow-y-auto relative">
+          <div className="mt-[0.6rem] space-y-[0.9rem]">
             {participants.map((participant) => (
               <Participant
                 key={participant._id}
@@ -292,69 +290,8 @@ const Participant = ({ username, conversationId, _id, image, roomData }) => {
   const [showUnblockPopup, setShowUnblockPopup] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [blocked, setBlocked] = useState(false);
   const user = useSelector((state) => state.user);
-  const streamsData = useSelector((state) => state.streams);
-
-  const sendInvitation = () => {
-    setShowChatPopup(false);
-    const streamArray = streamsData.streamers.find(
-      (stream) => stream.conversationId === roomData.conversationId
-    );
-
-    if (streamArray.myStreamers.length >= 4) {
-      setAlertMessage("You can't invite more than 4 people");
-      setShowAlert(true);
-    } else {
-      setAlertMessage(`An invitation has been sent to ${username}`);
-      setShowAlert(true);
-      socket.emit("stream-invitation", {
-        conversationId,
-        userId: _id,
-        adminName: roomData.creatorName,
-      });
-    }
-  };
-
-  const blockMember = async () => {
-    socket.emit("block-user", { conversationId, _id });
-    try {
-      const response = await axios.delete(
-        `${process.env.REACT_APP_API}/room/block/${roomData._id}/${_id}`,
-        {
-          headers: {
-            authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
-      if (response.data.alreadyBlocked) {
-        setShowChatPopup(false);
-        setAlertMessage(`You had already blocked ${username}`);
-        setShowAlert(true);
-      } else {
-        setShowChatPopup(false);
-        setAlertMessage(`${username} has been blocked`);
-        setShowAlert(true);
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-  const unblockMember = async () => {
-    try {
-      const response = await axios.delete(
-        `${process.env.REACT_APP_API}/room/unblock/${roomData._id}/${_id}`,
-        {
-          headers: {
-            authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
-
-      console.log(response.data);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
 
   return (
     <>
@@ -368,101 +305,31 @@ const Participant = ({ username, conversationId, _id, image, roomData }) => {
           />
         )}
       </div>
-      {showAlert && <Alert text={alertMessage} setShowAlert={setShowAlert} />}
+
       {showChatPopup && (
-        <div
-          onClick={() => setShowChatPopup(false)}
-          className="scale-in fixed right-0 top-0 left-0 bottom-0 bg-[rgba(0,0,0,0.7)] py-[1rem] z-[600] flex justify-center items-center"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="p-[1rem] mobile-max-width w-[400px] h-[300px] bg-white text-black"
-          >
-            <div className="mb-[1rem] flex items-center justify-between">
-              <p className="font-bold">{username}</p>
-              <Avatar alt={username} src={image} sx={{ width: 50, height: 50 }}>
-                {username?.split("")[0]}
-              </Avatar>
-            </div>
-            <div className="space-y-[0.7rem] mt-[2rem]">
-              <div
-                onClick={() => {
-                  sendInvitation();
-                }}
-                className="px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
-              >
-                <IoIosVideocam className="text-20px" />
-                <p className="text-[14px] lg:text-[16px] cursor-pointer">
-                  Invite to Video Stream
-                </p>
-              </div>
-              <div
-                onClick={() => {
-                  setShowChatPopup(false);
-                  blockMember();
-                }}
-                className="p-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex items-center space-x-[1rem] hover:bg-gray-300 transition duration-200 cursor-pointer"
-              >
-                <ImBlocked className="text-20px text-red-500" />
-                <p className="text-[14px] lg:text-[16px] cursor-pointer">
-                  Block
-                </p>
-              </div>
-            </div>
-          </div>
-          <VscChromeClose
-            onClick={() => setShowChatPopup(false)}
-            className="absolute top-[2rem] right-[4rem] text-white text-[30px] font-bold"
-          />
-        </div>
+        <ChatPopup
+          username={username}
+          image={image}
+          conversationId={conversationId}
+          _id={_id}
+          setAlertMessage={setAlertMessage}
+          setShowAlert={setShowAlert}
+          roomData={roomData}
+          setShowPopup={setShowChatPopup}
+          setBlocked={setBlocked}
+        />
       )}
       {showUnblockPopup && (
-        <div
-          onClick={() => setShowUnblockPopup(false)}
-          className="scale-in fixed top-0 left-0 right-0  bottom-0 bg-[rgba(0,0,0,0.7)]  py-[1rem] z-[600] flex justify-center items-center"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="p-[1rem] mobile-max-width w-[400px] h-[300px] bg-white text-black"
-          >
-            <div className="mb-[1rem] flex items-center justify-between">
-              <p className="font-bold">{username}</p>
-              <Avatar alt={username} src={image} sx={{ width: 50, height: 50 }}>
-                {username?.split("")[0]}
-              </Avatar>
-            </div>
-            <div className="mt-[3rem]">
-              <p className="my-[1rem] text-[14px] lg:text-[16px]">
-                Are you sure you want to unblock {username}?
-              </p>
-              <div className=" flex justify-between my-[1rem] items-center">
-                <button
-                  onClick={() => {
-                    setShowUnblockPopup(false);
-                    setAlertMessage(`You just Unblocked ${username}`);
-                    setShowAlert(true);
-                    unblockMember();
-                  }}
-                  className="border-none bg-[#005FEE] text-white w-[100px] h-[40px]"
-                >
-                  Yes
-                </button>
-                <button
-                  onClick={() => {
-                    setShowUnblockPopup(false);
-                  }}
-                  className="border-none text-[#005FEE] w-[100px]"
-                >
-                  No
-                </button>
-              </div>
-            </div>
-          </div>
-          <VscChromeClose
-            onClick={() => setShowUnblockPopup(false)}
-            className="absolute top-[2rem] right-[4rem] text-white text-[30px] font-bold"
-          />
-        </div>
+        <UnblockPopup
+          setShowUnblockPopup={setShowUnblockPopup}
+          username={username}
+          _id={_id}
+          image={image}
+          roomData={roomData}
+          setAlertMessage={setAlertMessage}
+          setShowAlert={setShowAlert}
+          setBlocked={setBlocked}
+        />
       )}
     </>
   );
