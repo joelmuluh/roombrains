@@ -155,7 +155,7 @@ function Editor() {
                 Coming Soon!!!
               </h1>
               <p className="my-[1.5rem] text-[13px] lg:text-[16px]">
-                To interact with other developers, You can use the share screen
+                To interact with other developers, You can use the screen-share
                 feature for now to enable them watch you code. While the
                 compilation feature is being built, You can only use this editor
                 to write code for everyone to see in real time without
