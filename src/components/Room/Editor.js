@@ -155,11 +155,11 @@ function Editor() {
                 Coming Soon!!!
               </h1>
               <p className="my-[1.5rem] text-[13px] lg:text-[16px]">
-                To interact with other developers, You can use the screen-share
-                feature for now to enable them watch you code. While the
-                compilation feature is being built, You can only use this editor
-                to write code for everyone to see in real time without
-                compilation.
+                For now, to interact with other developers, You can use the
+                screen-share feature for now to enable them watch you code.
+                While the compilation feature is being built, You can only use
+                this editor to write code for everyone to see in real time
+                without compilation.
               </p>
               <i className="font-semibold text-18px">Happy Coding!</i>
             </div>
