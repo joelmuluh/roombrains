@@ -149,17 +149,19 @@ function Editor() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="bg-[white] w-[90%] mx-auto p-[1rem] max-h-[400px] max-w-[500px]"
+              className="bg-[white] w-[90%] mx-auto px-[1rem] py-[1.5rem] max-h-[500px] max-w-[500px] text-black rounded-[4px]"
             >
-              <h1 className="font-semibold">Coming Soon!!!</h1>
-              <p className="my-[1.5rem] text-[14px] lg:text-[16px]">
+              <h1 className="font-semibold text-black text-[20px]">
+                Coming Soon!!!
+              </h1>
+              <p className="my-[1.5rem] text-[13px] lg:text-[16px]">
                 To interact with other developers, You can use the share screen
                 feature for now to enable them watch you code. While the
                 compilation feature is being built, You can only use this editor
                 to write code for everyone to see in real time without
                 compilation.
               </p>
-              <h1 className="font-semibold">Happy Coding!</h1>
+              <i className="font-semibold text-18px">Happy Coding!</i>
             </div>
             <VscChromeClose
               onClick={() => setShowPopup(false)}
