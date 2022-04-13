@@ -126,7 +126,6 @@ const Stream = ({
   useEffect(() => {
     if (streamRef) {
       streamRef.current.srcObject = stream;
-      streamRef.current.play();
     }
   }, []);
 
@@ -267,7 +266,8 @@ const Stream = ({
     const normalVideo = streamsData.streams.find(
       (stream) => stream._id === _id && stream.conversationId === conversationId
     );
-    const screenTrack = screen.getVideoTracks()[0];
+    const screenTrack = screen.getTracks()[0];
+
     normalVideo.call.peerConnection.getSenders().forEach((sender) => {
       if (sender.track.kind === "video") {
         sender.replaceTrack(screenTrack);
@@ -299,47 +299,6 @@ const Stream = ({
     setSharingScreen(false);
     setShowControlsPopup(false);
   };
-  useEffect(() => {
-    const localStream = streamsData.streams.find(
-      (stream) =>
-        stream._id === user._id &&
-        stream.conversationId === roomData?.conversationId
-    );
-    if (localStream) {
-      localStream.stream.oninactive = () => {
-        dispatch({
-          type: "REMOVE_STREAM",
-          payload: {
-            conversationId,
-            _id,
-          },
-        });
-
-        const payload = {
-          _id,
-          conversationId,
-        };
-
-        dispatch({
-          type: "QUIT_SCREEN_SHARE",
-          payload,
-        });
-        setSharingScreen(false);
-      };
-      localStream.stream.onended = () => {
-        const payload = {
-          _id,
-          conversationId,
-        };
-
-        dispatch({
-          type: "QUIT_SCREEN_SHARE",
-          payload,
-        });
-        setSharingScreen(false);
-      };
-    }
-  }, [streamsData.streams]);
 
   return (
     <>

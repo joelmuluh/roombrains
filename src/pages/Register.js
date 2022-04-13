@@ -68,7 +68,7 @@ function Register() {
       {loading && (
         <div
           style={{ transform: "translateX(-50%)" }}
-          className="fixed top-[3rem] left-[50%]"
+          className="fixed top-[5rem] left-[50%]"
         >
           <Loader />
         </div>

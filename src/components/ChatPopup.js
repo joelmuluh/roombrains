@@ -318,7 +318,7 @@ function ChatPopup({
             <p className="text-[12px] md:text-[16px] cursor-pointer">
               {hasWhiteboardAccess
                 ? "Restrict from Whiteboard"
-                : "Access to Whiteboard"}
+                : "Grant access to Whiteboard"}
             </p>
           </div>
           <div
@@ -330,7 +330,9 @@ function ChatPopup({
           >
             <HiCode className="text-[16px] lg:text-[25px]" />
             <p className="text-[12px] md:text-[16px] cursor-pointer">
-              {hasEditorAccess ? "Restrict from Editor" : "Access to Editor"}
+              {hasEditorAccess
+                ? "Restrict from Editor"
+                : "Grant access to Editor"}
             </p>
           </div>
           <div

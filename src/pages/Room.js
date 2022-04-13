@@ -18,7 +18,12 @@ function Room() {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
-  const streamsData = useSelector((state) => state.streams);
+  let peer = new Peer(undefined, {
+    host: process.env.REACT_APP_HOST,
+    secure: true,
+    port: 443,
+    path: "/peer",
+  });
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const info = {
@@ -28,11 +33,7 @@ function Room() {
     image: user?.image,
   };
   const { username, userId, image } = info;
-  const peer = new Peer(undefined, {
-    path: "/peer",
-    host: "localhost",
-    port: "5000",
-  });
+
   const getRoom = async () => {
     dispatch({ type: "GET_PEER", payload: peer });
     try {
@@ -49,7 +50,6 @@ function Room() {
         if (!response.data.roomData.blocked.includes(user._id)) {
           setRoomData(response.data.roomData);
           document.title = response.data.roomData.name;
-          socket.emit("addUser", userId);
           socket.emit("join-conversation", {
             conversationId: response.data.roomData.conversationId,
             userId,
@@ -59,16 +59,22 @@ function Room() {
             type: "INITIAL_STREAMERS",
             payload: response.data.roomData.conversationId,
           });
+          socket.emit("send_participants", {
+            conversationId: response.data.roomData.conversationId,
+            _id: user._id,
+            username,
+            image: user.image,
+          });
 
-          peer.on("open", (id) => {
+          if (peer.id) {
             socket.emit("new-connection", {
               conversationId: response.data.roomData.conversationId,
               _id: user._id,
               username,
-              peerId: id,
+              peerId: peer.id,
               image: user.image,
             });
-          });
+          } else console.log("Not getting Id");
           if (response.data.roomData.creator === user._id) {
             dispatch({
               type: "INITIAL_STREAMING_STATE",
@@ -90,7 +96,7 @@ function Room() {
         navigate("*");
       }
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
     }
   };
   useEffect(() => {
@@ -106,10 +112,7 @@ function Room() {
   return (
     <>
       {loading && !roomData?.exists ? (
-        <div
-          style={{ transform: "translate(-50%, -50%)" }}
-          className="fixed top-[50%] right-[50%] left-[50%]"
-        >
+        <div className="h-[100vh] flex items-center justify-center">
           <Loader />
         </div>
       ) : (

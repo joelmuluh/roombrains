@@ -20,7 +20,6 @@ function Chat({
   showMobileChat,
   setShowMobileChat,
   setMessageCount,
-  messageCount,
 }) {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
@@ -35,7 +34,6 @@ function Chat({
   const socket = useSelector((state) => state.streams.socket);
 
   const user = useSelector((state) => state.user);
-  const streamsData = useSelector((state) => state.streams);
   const info = {
     userId: user._id,
     token: user.token,
@@ -186,14 +184,14 @@ function Chat({
           className="chat-close-btn hidden text-white text-[1.6rem] absolute top-[1rem] right-[1rem]"
         />
       </div>
+      {loadChats && (
+        <div className="loader w-[30px] h-[30px] rounded-full bg-[white] border-[10px] border-solid border-[#f3f3f3] border-t-[#3498db] border-b-[#3498db] absolute left-[50%] right-[50%] mt-[30%]"></div>
+      )}
       {showAlert && <Alert text={alertMessage} setShowAlert={setShowAlert} />}
       {showControls && (
         <div className="flex absolute fixed w-full px-[1rem] top-[3rem] lg:top-[2rem] items-center justify-between mb-[1.5rem]">
           {messages.length > 0 && (
             <>
-              {loadChats && (
-                <div className="loader w-[30px] h-[30px] rounded-full bg-[white] border-[10px] border-solid border-[#f3f3f3] border-t-[#3498db] border-b-[#3498db] absolute left-[50%] right-[50%] mt-[1rem]"></div>
-              )}
               {!lastPage && (
                 <AiOutlineCaretLeft
                   onClick={() => setPage((prev) => prev + 1)}

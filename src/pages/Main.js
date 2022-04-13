@@ -10,15 +10,15 @@ function Main() {
   return (
     <div>
       <Header />
-      <section className="bg-[#0B1753] text-white h-[70vh] lg:h-[60vh]">
-        <div className="h-full lg:max-w-[1300px] mx-auto w-[100%] sm:w-[90%] flex md:items-center flex-col-reverse md:flex-row gap-[2rem]">
-          <div className="flex-[0.5] sm:flex-1 px-[1.5rem] lg:px-0 mb-[3rem] lg:mb-0">
-            <h1 className="text-[25px] sm:text-[30px] lg:text-[50px] font-semibold">
+      <section className="bg-[#0B1753] text-white py-[3rem] lg:pt-0 min-h-[50vh] md:h-[60vh] lg:h-[70vh]">
+        <div className="h-full lg:max-w-[1300px] mx-auto w-[100%] sm:w-[90%] flex sm:items-center flex-col sm:flex-row gap-[2rem]">
+          <div className="flex-[0.5] sm:flex-1 px-[1.5rem] lg:px-0 lg:mt-0">
+            <h1 className="text-[25px] sm:text-[30px] lg:text-[45px] font-semibold">
               TIRED OF WORKING ALONE?
             </h1>
             <p
               style={{ lineHeight: "1.8" }}
-              className="max-w-[400px] mb-[2rem] mt-[1rem]"
+              className="lg:max-w-[400px] mb-[2rem] mt-[1rem]"
             >
               Roombrains provides you an opportunity to have a real-time
               collaboration experience in everyway possible.
@@ -30,7 +30,7 @@ function Main() {
               GET STARTED
             </button>
           </div>
-          <div className="flex-[0.3] sm:flex-1 border-none h-full">
+          <div className="flex-[0.3] sm:flex-1 border-none h-full hidden sm:block">
             <img
               className="w-full h-full border-none object-cover sm:object-contain"
               src="/images/hero-image.jpg"
@@ -82,7 +82,7 @@ function Main() {
           Roombrains distinguishes itself by its target audience(Developers) and
           the concept of "Assets"(Whiteboard, Code Editor etc) which more will
           be added to the platform as time unfolds. Soon, developers will have
-          the ability to add custom Assets to the created Room.
+          the ability to add custom Assets to their created Room.
         </p>
 
         <div className="mt-[2rem]">

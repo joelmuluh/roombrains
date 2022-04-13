@@ -36,9 +36,14 @@ function Settings() {
   const [loading, setLoading] = useState(false);
   const [generateNewId, setGenerateNewId] = useState(false);
   const [description, setDescription] = useState(roomData?.description);
-  const copyToClipboard = () => {
-    copy(`https://www.roombrains.com/rooms/${roomData.meetingId}`);
+  const copyLinkToClipboard = () => {
+    copy(`${process.env.REACT_APP_API}/rooms/${roomData.meetingId}`);
     setAlertMessage("Link has been copied to clipboard");
+    setShowAlert(true);
+  };
+  const copyIdToClipboard = () => {
+    copy(roomData.meetingId);
+    setAlertMessage("Meeting Id has been copied to clipboard");
     setShowAlert(true);
   };
 
@@ -175,7 +180,7 @@ function Settings() {
           <div className="flex justify-between items-center">
             <h1 className="text-white text-[1rem] ">Share meeting link</h1>
             <BiClipboard
-              onClick={() => copyToClipboard()}
+              onClick={() => copyLinkToClipboard()}
               className="text-white text-[20px] lg:text-[25px]"
             />
           </div>
@@ -184,7 +189,7 @@ function Settings() {
               style={{ wordBreak: "break-all" }}
               className="text-white opacity-[0.59] text-[12px] md:text-[1rem]"
             >
-              https://www.roombrains.com/rooms/{roomData?.meetingId}
+              {process.env.REACT_APP_API}/rooms/{roomData?.meetingId}
             </span>
           </div>
         </div>
@@ -211,6 +216,12 @@ function Settings() {
             <span className="text-white opacity-[0.59] ">
               {roomData?.meetingId}
             </span>
+          </div>
+          <div className="flex justify-end mt-[10px]">
+            <BiClipboard
+              onClick={() => copyIdToClipboard()}
+              className="text-white text-[20px] lg:text-[25px]"
+            />
           </div>
         </div>
         <div className="flex justify-between">

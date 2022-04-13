@@ -55,10 +55,12 @@ function Profile() {
           }
         );
 
-        dispatch({
-          type: "UPDATE_DETAIL",
-          payload: response.data,
-        });
+        if (!response.data.error) {
+          dispatch({
+            type: "UPDATE_DETAIL",
+            payload: response.data,
+          });
+        }
       } catch (error) {
         console.log(error.message);
       }

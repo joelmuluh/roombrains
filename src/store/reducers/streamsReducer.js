@@ -1,9 +1,4 @@
 import { io } from "socket.io-client";
-const connectionOptions = {
-  "force new connection": true,
-  reconnectionAttempts: "Infinity",
-  timeout: 10000,
-};
 
 const initialState = {
   streaming: [
@@ -14,7 +9,7 @@ const initialState = {
   ],
   streams: [],
   streamers: [],
-  socket: io(`${process.env.REACT_APP_API}`, connectionOptions),
+  socket: io(`${process.env.REACT_APP_API}`),
 };
 
 export const streamReducer = (state = initialState, action) => {
@@ -54,11 +49,7 @@ export const streamReducer = (state = initialState, action) => {
         myStream?.stream?.getTracks().forEach((track) => {
           track.stop();
         });
-        if (action.payload._id === action.payload.myId) {
-          myStream.call.peerConnection.getSenders().forEach((sender) => {
-            sender.track.stop();
-          });
-        }
+
         const newStreams = state.streams.filter(
           (stream) =>
             stream._id !== action.payload._id &&

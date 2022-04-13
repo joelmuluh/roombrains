@@ -76,11 +76,9 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
     });
   };
 
-  useEffect(() => {
-    socket.off("get-participants").on("get-participants", (myusers) => {
-      setParticipants(myusers);
-    });
-  }, []);
+  socket.off("get-participants").on("get-participants", (myusers) => {
+    setParticipants(myusers);
+  });
 
   socket.off("others_peerId").on("others_peerId", (data) => {
     if (data.inviteeId === user._id) {
