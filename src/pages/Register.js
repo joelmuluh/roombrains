@@ -64,7 +64,7 @@ function Register() {
     document.title = "Roombrains | Register";
   }, []);
   return (
-    <div className="h-[100vh] lg:overflow-y-auto bg-[#1C1C1C] ">
+    <div className="h-[100vh] overflow-y-auto bg-[#1C1C1C] ">
       {loading && (
         <div
           style={{ transform: "translateX(-50%)" }}
@@ -75,7 +75,7 @@ function Register() {
       )}
       <Header />
       <div className="h-full px-[1rem] flex flex-col items-center pt-[2.5rem] lg:pt-[7%]">
-        <h1 className="mb-[2rem]  text-white font-semibold text-[2rem]">
+        <h1 className="mb-[2rem] text-white font-semibold text-[1.3rem] lg:text-[2rem]">
           Register for Free
         </h1>
         <div className="space-y-[1.5rem] w-[98%] mx-auto max-w-[600px] py-[1rem]">
@@ -202,7 +202,7 @@ function Register() {
 
           <div>
             <button
-              className="border-none outline-none w-[150px] py-[15px] bg-[#005FEE] text-white"
+              className="border-none outline-none w-[135px] lg:w-[150px] py-[10px] lg:py-[15px] bg-[#005FEE] text-white"
               onClick={() => handleForm()}
             >
               Register

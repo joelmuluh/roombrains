@@ -1,19 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import { Button } from "@mui/material";
 import { BsFillPlayFill } from "react-icons/bs";
-
+import { VscChromeClose } from "react-icons/vsc";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/theme-dracula";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-c_cpp";
-import "ace-builds/src-noconflict/mode-csharp";
 import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/mode-ruby";
-import "ace-builds/src-noconflict/mode-kotlin";
-import "ace-builds/src-noconflict/mode-swift";
-import { Button } from "@mui/material";
 
 import { useOutletContext } from "react-router-dom";
 function Editor() {
@@ -43,6 +39,7 @@ function Editor() {
     setLanguage,
   } = useOutletContext();
   const [codeFontSize, setCodeFontSize] = useState(20);
+  const [showPopup, setShowPopup] = useState(false);
 
   const writeCode = (e) => {
     setCode(e);
@@ -61,6 +58,15 @@ function Editor() {
         });
       }
     }
+  };
+
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setCodeFontSize(15);
+    }
+  }, []);
+  const runCode = () => {
+    setShowPopup(true);
   };
   return (
     <div className="h-full ">
@@ -98,6 +104,7 @@ function Editor() {
               socket={socket}
             />
             <Button
+              onClick={() => runCode()}
               variant="contained"
               color="primary"
               startIcon={<BsFillPlayFill className="text-green-500" />}
@@ -135,6 +142,31 @@ function Editor() {
           />
         )}
         {showAlert && <Alert text={alertMessage} setShowAlert={setShowAlert} />}
+        {showPopup && (
+          <div
+            onClick={() => setShowPopup(false)}
+            className={`scale-in fixed z-[1000] top-0 left-0 bottom-0 right-0 bg-[rgba(0,0,0,0.9)] flex justify-center items-center`}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[white] w-[90%] mx-auto p-[1rem] max-h-[400px] max-w-[500px]"
+            >
+              <h1 className="font-semibold">Coming Soon!!!</h1>
+              <p className="my-[1.5rem] text-[14px] lg:text-[16px]">
+                To interact with other developers, You can use the share screen
+                feature for now to enable them watch you code. While the
+                compilation feature is being built, You can only use this editor
+                to write code for everyone to see in real time without
+                compilation.
+              </p>
+              <h1 className="font-semibold">Happy Coding!</h1>
+            </div>
+            <VscChromeClose
+              onClick={() => setShowPopup(false)}
+              className="absolute top-[2rem] right-[4rem] text-white text-[30px] font-bold"
+            />
+          </div>
+        )}
       </>
     </div>
   );

@@ -34,8 +34,6 @@ function Home() {
     navigate,
   } = useOutletContext();
 
-  const [showControlsPopup, setShowControlsPopup] = useState(false);
-
   return (
     <div className=" px-[1rem] lg:px-[1.5rem] w-full h-full">
       <div className="pb-[1rem] border-b border-[rgba(255,255,255,0.1)]">
@@ -46,19 +44,17 @@ function Home() {
 
       {streamsData.streams.length > 0 ? (
         <div className="pt-[2rem] video-wrapper gap-[1rem] lg:max-w-[900px] lg:mx-auto ">
-          {streamsData?.streams
-            ?.filter(
+          {streamsData.streams
+            .filter(
               (stream) => stream.conversationId === roomData.conversationId
             )
             .map((streamData) => (
               <Stream
                 key={streamData._id}
                 _id={streamData._id}
-                stream={streamData?.stream}
+                stream={streamData.stream}
                 image={streamData.image}
                 username={streamData.username}
-                showControlsPopup={showControlsPopup}
-                setShowControlsPopup={setShowControlsPopup}
                 conversationId={roomData.conversationId}
                 roomData={roomData}
                 peer={peer}
@@ -77,8 +73,7 @@ function Home() {
             </p>
           ) : (
             <p>
-              No one is doing a video stream. The executive president(admin) of
-              this room,{" "}
+              No one is doing a video stream. The Admin of this room,{" "}
               <span className="font-semibold">{roomData?.creatorName}</span>,
               has not given permissions.
             </p>
@@ -109,8 +104,6 @@ const Stream = ({
   stream,
   username,
   image,
-  showControlsPopup,
-  setShowControlsPopup,
   conversationId,
   roomData,
   streamsData,
@@ -123,11 +116,12 @@ const Stream = ({
   const [enableVideo, setEnableVideo] = useState(true);
   const [sharingScreen, setSharingScreen] = useState(false);
   const socket = useSelector((state) => state.streams.socket);
+  const [showControlsPopup, setShowControlsPopup] = useState(false);
   useEffect(() => {
     if (streamRef) {
       streamRef.current.srcObject = stream;
     }
-  }, []);
+  }, [streamsData]);
 
   const muteUser = () => {
     setMute(true);

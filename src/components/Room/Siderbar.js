@@ -25,7 +25,9 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
   const streamingState = streamsData.streaming.find(
     (streamState) => streamState.conversationId === roomData.conversationId
   );
-
+  window.addEventListener("click", () => {
+    setShowSidebar(false);
+  });
   const startStream = async () => {
     dispatch({ type: "START_STREAMING", payload: roomData?.conversationId });
     const localstream = await getStream();
@@ -99,9 +101,10 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
 
   return (
     <div
+      onClick={(e) => e.stopPropagation()}
       className={`flex-[0.2] ${
         showSidebar ? "show-sidebar" : "hide-sidebar"
-      } xl:block xl:static h-full bg-[#1F1F1F] `}
+      } xl:block xl:static h-full bg-[#1F1F1F] overflow-y-auto pb-[4rem]`}
     >
       <VscChromeClose
         onClick={() => setShowSidebar(false)}

@@ -7,7 +7,7 @@ function CreateRoom({ setShowCreateRoom }) {
   const [currentTab, setCurrentTab] = useState("CreateNewRoom");
 
   return (
-    <div className="fixed z-[10] overflow-y-scroll lg:overflow-y-auto top-0 bottom-0 left-0 right-0 lg:bg-[#1F1F1F] bg-[white] scale-in text-black">
+    <div className="fixed z-[1000] overflow-y-scroll lg:overflow-y-auto top-0 bottom-0 left-0 right-0 lg:bg-[#1F1F1F] bg-[white] scale-in text-black">
       <div className=" lg:mt-[2.5rem] max-w-[800px] mx-auto ">
         <div className="flex bg-[#1F1F1F] py-[1rem] lg:py-0 lg:block justify-between items-center px-[1rem] lg:px-0">
           <h1 className=" lg:mb-[2rem] lg:mb-[3rem] font-[400] text-[1rem] lg:text-[1.5rem] lg:text-[2rem] text-white">

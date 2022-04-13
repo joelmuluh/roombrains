@@ -343,7 +343,7 @@ function WhiteBoard() {
           onTouchStart={(e) => touchStart(e)}
           onTouchEnd={(e) => touchEnd(e)}
           onTouchMove={(e) => touchMove(e)}
-          className="board bg-white"
+          className="board bg-white overflow-y-hidden"
         ></canvas>
       </div>
 

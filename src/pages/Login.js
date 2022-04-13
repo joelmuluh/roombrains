@@ -77,7 +77,7 @@ function Login() {
     document.title = "Roombrains | login";
   }, []);
   return (
-    <div className="h-[100vh] lg:overflow-y-auto bg-[#1C1C1C]">
+    <div className="h-[100vh] overflow-y-auto bg-[#1C1C1C]">
       {loading && (
         <div
           style={{ transform: "translateX(-50%)" }}
@@ -87,27 +87,32 @@ function Login() {
         </div>
       )}
       <Header />
-      <div className="h-full px-[1rem] flex flex-col items-center pt-[2.5rem] lg:pt-[7%]">
-        <h1 className="mb-[2rem] text-white font-semibold text-[2rem]">
+      <div className="h-full px-[1rem] flex flex-col items-center pt-[1.7rem] sm:pt-[2.5rem] lg:pt-[7%]">
+        <h1 className="mb-[2rem] text-white font-semibold text-[1.3rem] lg:text-[2rem]">
           Login
         </h1>
         <div className="space-y-[1.5rem] w-[98%] mx-auto max-w-[600px] py-[1rem]">
           <div>
             {!EmailValid && (
-              <p className="text-red-500 mb-[16x]">
+              <p className="text-red-500 text-[12px] lg:text-[14px] mb-[16x]">
                 Please Enter a valid Email
               </p>
             )}
             {!filled && (
-              <p className="text-red-500 mb-[16x]">All fields must be filled</p>
+              <p className="text-red-500 text-[12px] lg:text-[14px] mb-[16x]">
+                All fields must be filled
+              </p>
             )}
             {!accountExists && (
-              <p className="text-red-500 mb-[16x]">
+              <p className="text-red-500 text-[12px] lg:text-[14px] mb-[16x]">
                 This account doesn't exist
               </p>
             )}
             <div className="flex flex-col space-y-[8px]">
-              <label htmlFor="" className="text-white">
+              <label
+                htmlFor=""
+                className="text-white text-[14px] lg:text-[16px]"
+              >
                 Email
               </label>
               <input
@@ -131,12 +136,15 @@ function Login() {
           </div>
           <div>
             {!passwordCorrect && (
-              <p className="text-red-500 mb-[16x]">
+              <p className="text-red-500 text-[12px] lg:text-[14px] mb-[16x]">
                 Your password is not correct
               </p>
             )}
             <div className="flex flex-col space-y-[8px]">
-              <label htmlFor="" className="text-white">
+              <label
+                htmlFor=""
+                className="text-white text-[14px] lg:text-[16px]"
+              >
                 Password
               </label>
               <div className="relative flex justify-between items-center">
@@ -170,7 +178,7 @@ function Login() {
 
           <div>
             <button
-              className="border-none outline-none w-[150px] py-[15px] bg-[#005FEE] text-white"
+              className="border-none outline-none w-[135px] lg:w-[150px] py-[10px] lg:py-[15px] bg-[#005FEE] text-white"
               onClick={() => handleForm()}
             >
               Login

@@ -24,6 +24,7 @@ function Room() {
     port: 443,
     path: "/peer",
   });
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const info = {
@@ -124,7 +125,10 @@ function Room() {
                   className={`z-[2] xl:hidden absolute top-[0.7rem] left-[1rem]`}
                 >
                   <GoThreeBars
-                    onClick={() => setShowSidebar(true)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowSidebar(true);
+                    }}
                     className="text-white text-[1.6rem]"
                   />
                 </div>

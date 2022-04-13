@@ -131,7 +131,7 @@ function JoinRoom({ setShowJoinRoom }) {
           <div className="flex justify-between items-center">
             <button
               onClick={() => join()}
-              className="bg-[#1492E6] text-white h-[45px] px-[2rem] transition duration-200 hover:bg-[#005FEE]"
+              className="bg-[#1492E6] text-white h-[35px] sm:h-[45px] px-[2rem] transition duration-200 hover:bg-[#005FEE] text-[14px] md:text-[16px]"
             >
               JOIN
             </button>

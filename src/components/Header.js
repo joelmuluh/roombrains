@@ -14,7 +14,7 @@ function Header() {
     }
   }, [user.token]);
   return (
-    <header className="text-white h-[70px] bg-[#0B1753] sticky top-0 left-0 w-full">
+    <header className="text-white h-[60px] sm:h-[70px] bg-[#0B1753] sticky top-0 left-0 z-[50] w-full">
       <div className="h-full max-w-[1300px] mx-auto w-[90%] flex items-center justify-between">
         <Link to="/">
           <div className="flex items-center">

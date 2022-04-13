@@ -26,7 +26,7 @@ function About() {
   } = useOutletContext();
 
   return (
-    <div className="lg:px-[2.5rem] md:w-[80%] mx-auto h-full">
+    <div className="lg:px-[2.5rem] w-[90%] sm:w-[75%] md:w-[80%] mx-auto h-full">
       <div className="pb-[1rem] border-b border-[rgba(255,255,255,0.1)]">
         <h1 className="font-bold text-[1rem] lg:text-[1.5rem]  text-center">
           {roomData?.name}
@@ -56,7 +56,7 @@ function About() {
           <h1 className="font-semibold mb-[0.2rem] text-[1.3rem]">
             Description
           </h1>
-          <p>{roomData.description}</p>
+          <p className="text-[14px] md:text-[16px]">{roomData.description}</p>
         </div>
       </div>
       <>

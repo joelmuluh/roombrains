@@ -165,7 +165,7 @@ function Chat({
       }  flex-[0.25] bg-[#1F1F1F] h-full text-white flex flex-col`}
     >
       <div
-        className={`relative py-[1.5rem] border-b border-[rgba(255,255,255,0.2)] mb-[1rem] h-[7%] ${
+        className={`relative py-[1.5rem] border-b border-[rgba(255,255,255,0.2)] mb-[1rem] h-[9%] lg:h-[7%] ${
           showMobileChat && "flex items-center justify-between pl-[1rem]"
         }`}
       >
@@ -208,7 +208,7 @@ function Chat({
           )}
         </div>
       )}
-      <div className="h-[80%] overflow-y-auto">
+      <div className="h-[83%] lg:h-[80%] overflow-y-auto">
         <div className="space-y-[0.7rem] mb-[1rem]">
           <>
             {messages?.length > 0 ? (
@@ -237,49 +237,51 @@ function Chat({
         </div>
       </div>
 
-      <div className="h-[7%] relative border-t border-b border-[rgba(255,255,255,0.2)]">
-        {showEmoji && (
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="absolute bottom-[5rem] bg-red-400 left-[1rem] lg:left-0"
-          >
-            <Picker onEmojiClick={handleEmojiClick} />
-          </div>
-        )}
-        <div className="h-full flex items-center px-[2rem]">
-          <div className="">
-            <GrEmoji
-              className={`${showEmoji && "text-[yellow]"}`}
+      <div className="h-[50px] bg-[#1F1F1F] lg:h-[7%] border-t border-b border-[rgba(255,255,255,0.2)] w-full absolute bottom-0 left-0 md:static">
+        <div className="relative h-full w-full flex items-center">
+          {showEmoji && (
+            <div
               onClick={(e) => {
                 e.stopPropagation();
-                setShowEmoji(true);
               }}
-              size={25}
+              className="absolute bottom-[5rem] left-[1rem] lg:left-0"
+            >
+              <Picker onEmojiClick={handleEmojiClick} />
+            </div>
+          )}
+          <div className="h-full flex items-center px-[2rem]">
+            <div className="">
+              <GrEmoji
+                className={`${showEmoji && "text-[yellow]"}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEmoji(true);
+                }}
+                size={25}
+              />
+            </div>
+            <input
+              className="flex-1 flex flexwrap-wrap text-white outline-none border-none h-full bg-transparent pl-[1rem] pr-[0.6rem] mobile-input"
+              type="text"
+              placeholder="Type a message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.code === "Enter") {
+                  sendMessage();
+                }
+              }}
+            />
+
+            <IoMdSend
+              className="text-[25px] absolute right-[1rem]"
+              color="#1492E6 "
+              onClick={() => sendMessage()}
             />
           </div>
-          <input
-            className="flex-1 flex flexwrap-wrap text-white outline-none border-none h-full bg-transparent pl-[1rem] pr-[0.6rem] mobile-input"
-            type="text"
-            placeholder="Type a message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.code === "Enter") {
-                sendMessage();
-              }
-            }}
-          />
-
-          <IoMdSend
-            className="text-[25px] absolute right-[1rem]"
-            color="#1492E6 "
-            onClick={() => sendMessage()}
-          />
         </div>
       </div>
-      <div className="h-[10%]"></div>
+      <div className="h-[10%] hidden md:block"></div>
     </div>
   );
 }
