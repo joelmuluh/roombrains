@@ -158,7 +158,7 @@ function Editor() {
                 For now, to interact with other developers, You can use the
                 screen-share feature to enable them watch you code. While the
                 compilation feature is being built, You can only use this editor
-                to write code for everyone to see in real time but without
+                to write code for everyone to see in real-time but without
                 compilation.
               </p>
               <i className="font-semibold text-18px">Happy Coding!</i>
