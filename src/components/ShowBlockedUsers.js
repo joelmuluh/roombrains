@@ -63,7 +63,7 @@ function ShowBlockedUsers({ showPopup, setSelectedOption, user, roomData }) {
                 onClick={() => unblockMember(member._id)}
                 className="border-none ml-[1rem] text-white text-[12px] md:text-[14px] bg-[#1492E6] px-[0.6rem] py-[5px] "
               >
-                {!loading ? "Unblock" : <i>blocking...</i>}
+                {!loading ? "Unblock" : <i>unblocking...</i>}
               </button>
             </div>
           ))
