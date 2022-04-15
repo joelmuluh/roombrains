@@ -274,8 +274,8 @@ const Participant = ({ username, conversationId, _id, image, roomData }) => {
   return (
     <>
       <div className="flex items-center justify-between px-[1rem]">
-        <p className=" opacity-[0.9]">
-          {_id === roomData.creator ? `${username} (The Admin)` : username}
+        <p className="opacity-[0.9] text-[12px] lg:text-[14px]">
+          {_id === roomData.creator ? `${username} (Admin)` : username}
         </p>
         {user._id === roomData.creator && _id !== roomData.creator && (
           <BsThreeDots

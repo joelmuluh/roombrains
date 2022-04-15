@@ -44,7 +44,7 @@ function ShowBlockedUsers({ showPopup, setSelectedOption, user, roomData }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-[white] w-[90%] mx-auto px-[1rem] py-[0.7rem] h-[500px] max-h-[500px] max-w-[500px] text-black rounded-[4px] pb-[1.5rem] overflow-y-auto"
+        className="bg-[white] w-[80%] mx-auto px-[1rem] py-[0.7rem] h-[300px] lg:h-[500px] max-h-[500px] max-w-[500px] text-black rounded-[4px] pb-[1.5rem] overflow-y-auto"
       >
         {blockedUsers.length > 0 ? (
           blockedUsers.map((member) => (
@@ -78,7 +78,7 @@ function ShowBlockedUsers({ showPopup, setSelectedOption, user, roomData }) {
           showPopup(false);
           setSelectedOption("actions");
         }}
-        className="absolute z-[20] top-[1.5rem] lg:top-[2rem] right-[2rem] lg:right-[4rem] text-white text-[30px] font-bold"
+        className="absolute mb-[1rem] z-[20] top-[1.5rem] lg:top-[2rem] right-[2rem] lg:right-[4rem] text-white text-[30px] font-bold"
       />
     </div>
   );
