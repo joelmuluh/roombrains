@@ -9,7 +9,13 @@ const initialState = {
   ],
   streams: [],
   streamers: [],
-  socket: io(`${process.env.REACT_APP_API}`),
+  socket: io(`${process.env.REACT_APP_API}`, {
+    reconnection: true,
+    reconnectionDelay: 500,
+    reconnectionDelayMax: 5000,
+    reconnectionAttempts: Infinity,
+  }),
+  callHandlers: [],
 };
 
 export const streamReducer = (state = initialState, action) => {
@@ -24,20 +30,23 @@ export const streamReducer = (state = initialState, action) => {
         streams: [...state.streams, action.payload],
       };
     case "ADD_CALL_HANDLER":
-      const callStream = state.streams.find(
-        (stream) =>
-          stream._id === action.payload._id &&
-          stream.conversationId === action.payload.conversationId
+      return {
+        ...state,
+        callHandlers: [
+          ...state.callHandlers,
+          {
+            conversationId: action.payload.conversationId,
+            call: action.payload.call,
+          },
+        ],
+      };
+    case "REMOVE_CALL_HANDLER":
+      const newHandlers = state.callHandlers.filter(
+        (x) =>
+          x._id !== action.payload.id &&
+          x.conversationId === action.payload.conversationId
       );
-      if (callStream) {
-        const newCallStream = { ...callStream, call: action.payload.call };
-        const newStreams = state.streams.filter(
-          (stream) =>
-            stream._id !== action.payload._id &&
-            stream.conversationId === action.payload.conversationId
-        );
-        return { ...state, streams: [...newStreams, newCallStream] };
-      } else return state;
+      return { ...state, callHandlers: newHandlers };
 
     case "REMOVE_STREAM":
       const myStream = state.streams.find(
@@ -59,6 +68,19 @@ export const streamReducer = (state = initialState, action) => {
       } else {
         return state;
       }
+    case "USER_LOGOUT":
+      return {
+        ...state,
+        streams: [],
+        streamers: [],
+        callHandlers: [],
+        streaming: [
+          {
+            conversationId: null,
+            value: false,
+          },
+        ],
+      };
 
     case "ADD_STREAMER":
       const streamers = state.streamers.find(

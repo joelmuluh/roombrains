@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FiChevronUp } from "react-icons/fi";
 import { VscChromeClose } from "react-icons/vsc";
@@ -7,7 +7,6 @@ import { BsThreeDots } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { getStream } from "../../functions/getStream";
 import { links } from "../../utils/sidelinks";
-import axios from "axios";
 import Alert from "../Alert";
 import ChatPopup from "../ChatPopup";
 import UnblockPopup from "../UnblockPopup";
@@ -17,8 +16,6 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
   const [activeLink, setActiveLink] = useState("Home");
   const [chevronDown, setChevronDown] = useState(false);
   const user = useSelector((state) => state.user);
-  const meeting = useSelector((state) => state.meeting);
-  const peer = meeting.peer;
   const streamsData = useSelector((state) => state.streams);
   const dispatch = useDispatch();
   const conversationId = roomData?.conversationId;
@@ -80,23 +77,6 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
 
   socket.off("get-participants").on("get-participants", (myusers) => {
     setParticipants(myusers);
-  });
-
-  socket.off("others_peerId").on("others_peerId", (data) => {
-    if (data.inviteeId === user._id) {
-      const streamData = streamsData.streams.find(
-        (stream) =>
-          stream.conversationId === roomData.conversationId &&
-          stream._id === user._id
-      );
-      peer?.call(data.peerId, streamData?.stream, {
-        metadata: {
-          _id: user._id,
-          image: user.image,
-          username: user.username,
-        },
-      });
-    }
   });
 
   return (
@@ -229,14 +209,14 @@ const Utility = ({
       }}
     >
       <div
-        className={`w-full mt-[0.7rem] hover:bg-[#005FEE] transition duration-[150ms] ease-in py-[10px] px-[1rem] ${
+        className={`w-full mt-[0.7rem] hover:bg-[#005FEE] transition duration-[150ms] ease-in py-[10px] px-[1rem]  ${
           activeLink === text && "bg-[#005FEE]"
         }`}
       >
         <div className="flex items-center">
           {icon}
           <p
-            className={`text-[17px] ml-[0.8rem] lg:ml-[1.5rem] hover:opacity-[1]  ${
+            className={`text-[14px] lg:text-[17px] ml-[0.8rem] lg:ml-[1.5rem] hover:opacity-[1]  ${
               activeLink === text ? "opacity-[1]" : "opacity-[0.7]"
             }`}
           >
@@ -284,7 +264,6 @@ const Settings = ({
 };
 
 const Participant = ({ username, conversationId, _id, image, roomData }) => {
-  const socket = useSelector((state) => state.streams.socket);
   const [showChatPopup, setShowChatPopup] = useState(false);
   const [showUnblockPopup, setShowUnblockPopup] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -295,7 +274,9 @@ const Participant = ({ username, conversationId, _id, image, roomData }) => {
   return (
     <>
       <div className="flex items-center justify-between px-[1rem]">
-        <p className=" opacity-[0.9]">{username}</p>
+        <p className=" opacity-[0.9]">
+          {_id === roomData.creator ? `${username} (The Admin)` : username}
+        </p>
         {user._id === roomData.creator && _id !== roomData.creator && (
           <BsThreeDots
             onClick={() => setShowChatPopup(true)}

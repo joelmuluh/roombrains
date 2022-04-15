@@ -209,7 +209,7 @@ function Chat({
         </div>
       )}
       <div className="h-[83%] lg:h-[80%] overflow-y-auto">
-        <div className="space-y-[0.7rem] mb-[1rem]">
+        <div className="space-y-[0.7rem] mb-[1rem] pb-[1rem]">
           <>
             {messages?.length > 0 ? (
               messages?.map((chat, index) => (

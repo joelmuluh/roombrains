@@ -33,17 +33,16 @@ function Home() {
     dispatch,
     navigate,
   } = useOutletContext();
-
   return (
-    <div className=" px-[1rem] lg:px-[1.5rem] w-full h-full">
-      <div className="pb-[1rem] border-b border-[rgba(255,255,255,0.1)]">
-        <h1 className="font-bold text-[1rem] lg:text-[1.5rem]  text-center">
+    <div className="px-[1rem] lg:px-[1.5rem] w-full h-full">
+      <div className="pb-[0.8rem] px-[1rem] lg:pb-[1rem] border-b border-[rgba(255,255,255,0.1)]">
+        <h1 className="font-bold text-[14px] lg:text-[1.5rem] text-center">
           {roomData?.name}
         </h1>
       </div>
 
       {streamsData.streams.length > 0 ? (
-        <div className="pt-[2rem] video-wrapper gap-[1rem] lg:max-w-[900px] lg:mx-auto ">
+        <div className="pt-[2rem] video-wrapper gap-[1rem] w-[80%] lg:max-w-[900px] lg:mx-auto pb-[5rem]">
           {streamsData.streams
             .filter(
               (stream) => stream.conversationId === roomData.conversationId
@@ -262,19 +261,34 @@ const Stream = ({
     );
     const screenTrack = screen.getTracks()[0];
 
-    normalVideo.call.peerConnection.getSenders().forEach((sender) => {
-      if (sender.track.kind === "video") {
-        sender.replaceTrack(screenTrack);
-      }
-    });
+    const handlers = streamsData.callHandlers.filter(
+      (callHandler) => callHandler.conversationId === roomData.conversationId
+    );
+
+    if (handlers.length > 0) {
+      handlers.forEach((handler) => {
+        handler.call.peerConnection.getSenders().forEach((sender) => {
+          if (sender.track.kind === "video") {
+            sender.replaceTrack(screenTrack);
+          }
+        });
+      });
+    }
 
     screenTrack.onended = () => {
-      normalVideo.call.peerConnection.getSenders().forEach((sender) => {
-        if (sender.track.kind === "video") {
-          streamRef.current.srcObject = normalVideo.stream;
-          sender.replaceTrack(normalVideo.stream.getVideoTracks()[0]);
-        }
-      });
+      streamRef.current.srcObject = normalVideo.stream;
+      const handlers = streamsData.callHandlers.filter(
+        (callHandler) => callHandler.conversationId === roomData.conversationId
+      );
+      if (handlers.length > 0) {
+        handlers.forEach((handler) => {
+          handler.call.peerConnection.getSenders().forEach((sender) => {
+            if (sender.track.kind === "video") {
+              sender.replaceTrack(normalVideo.stream.getVideoTracks()[0]);
+            }
+          });
+        });
+      }
       setSharingScreen(false);
     };
   };
@@ -284,11 +298,19 @@ const Stream = ({
       (stream) => stream._id === _id && stream.conversationId === conversationId
     );
     streamRef.current.srcObject = normalVideo.stream;
-    normalVideo.call.peerConnection.getSenders().forEach((sender) => {
-      if (sender.track.kind === "video") {
-        sender.replaceTrack(normalVideo.stream.getVideoTracks()[0]);
-      }
-    });
+
+    const handlers = streamsData.callHandlers.filter(
+      (callHandler) => callHandler.conversationId === roomData.conversationId
+    );
+    if (handlers.length > 0) {
+      handlers.forEach((handler) => {
+        handler.call.peerConnection.getSenders().forEach((sender) => {
+          if (sender.track.kind === "video") {
+            sender.replaceTrack(normalVideo.stream.getVideoTracks()[0]);
+          }
+        });
+      });
+    }
 
     setSharingScreen(false);
     setShowControlsPopup(false);
@@ -297,7 +319,12 @@ const Stream = ({
   return (
     <>
       <div className="video-player">
-        <video className="w-[100%]" ref={streamRef} autoPlay controls />
+        <video
+          className="w-[100%] max-h-[50vh]"
+          ref={streamRef}
+          autoPlay
+          controls
+        />
 
         <div className="flex items-center h-[55px] bg-[#3A3A3A] px-[1rem]">
           <Avatar alt={username} src={image} sx={{ width: 30, height: 30 }}>
@@ -318,11 +345,11 @@ const Stream = ({
         {showControlsPopup && (
           <div
             onClick={() => setShowControlsPopup(false)}
-            className="scale-in fixed top-0 left-0 right-0  bottom-0 bg-[rgba(0,0,0,0.7)]  py-[1rem] z-[600] flex justify-center items-center"
+            className="scale-in fixed top-0 left-0 right-0 bottom-0 bg-[rgba(0,0,0,0.7)]  py-[1rem] z-[600] flex justify-center items-center"
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="p-[1rem] mobile-max-width w-[400px] py-[1.5rem] bg-white text-black"
+              className="p-[1rem] mobile-max-width w-[350px] py-[1.5rem] bg-white text-black"
             >
               <div className="mb-[1.5rem] flex items-center justify-between">
                 <p className="font-bold">{username}</p>
@@ -342,9 +369,7 @@ const Stream = ({
                       className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
                     >
                       <BsMicMuteFill className="text-20px" />
-                      <p className="text-[14px] lg:text-[16px] cursor-pointer">
-                        unMute
-                      </p>
+                      <p className="text-[14px] cursor-pointer">unMute</p>
                     </div>
                   ) : (
                     <div
@@ -352,9 +377,7 @@ const Stream = ({
                       className="px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
                     >
                       <BsFillMicFill className="text-20px" />
-                      <p className="text-[14px] lg:text-[16px] cursor-pointer">
-                        Mute
-                      </p>
+                      <p className="text-[14px] cursor-pointer">Mute</p>
                     </div>
                   )}
 
@@ -366,7 +389,7 @@ const Stream = ({
                           className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
                         >
                           <BsMicMuteFill className="text-20px" />
-                          <p className="text-[14px] lg:text-[16px] cursor-pointer">
+                          <p className="text-[14px] cursor-pointer">
                             Unmute For everyone
                           </p>
                         </div>
@@ -376,7 +399,7 @@ const Stream = ({
                           className="px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
                         >
                           <BsFillMicFill className="text-20px" />
-                          <p className="text-[14px] lg:text-[16px] cursor-pointer">
+                          <p className="text-[14px] cursor-pointer">
                             Mute for everyone
                           </p>
                         </div>
@@ -390,7 +413,7 @@ const Stream = ({
                       className="px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
                     >
                       <BsFillCameraVideoOffFill className="text-20px" />
-                      <p className="text-[14px] lg:text-[16px] cursor-pointer">
+                      <p className="text-[14px] cursor-pointer">
                         Disable Video
                       </p>
                     </div>
@@ -400,9 +423,7 @@ const Stream = ({
                       className="px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
                     >
                       <BsCameraVideoFill className="text-20px" />
-                      <p className="text-[14px] lg:text-[16px] cursor-pointer">
-                        Enable Video
-                      </p>
+                      <p className="text-[14px] cursor-pointer">Enable Video</p>
                     </div>
                   )}
 
@@ -414,7 +435,7 @@ const Stream = ({
                           className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
                         >
                           <BsShareFill className="text-20px" />
-                          <p className="text-[14px] lg:text-[16px] cursor-pointer">
+                          <p className="text-[14px] cursor-pointer">
                             share screen
                           </p>
                         </div>
@@ -424,7 +445,7 @@ const Stream = ({
                           className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
                         >
                           <BsShareFill className="text-20px" />
-                          <p className="text-[14px] lg:text-[16px] cursor-pointer">
+                          <p className="text-[14px] cursor-pointer">
                             Stop ScreenShare
                           </p>
                         </div>
@@ -434,9 +455,7 @@ const Stream = ({
                         className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
                       >
                         <ImExit className="text-20px" />
-                        <p className="text-[14px] lg:text-[16px] cursor-pointer">
-                          Leave Chat
-                        </p>
+                        <p className="text-[14px] cursor-pointer">Leave Chat</p>
                       </div>
                     </>
                   )}
@@ -447,7 +466,7 @@ const Stream = ({
                       className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
                     >
                       <ImExit className="text-20px" />
-                      <p className="text-[14px] lg:text-[16px] cursor-pointer">
+                      <p className="text-[14px] cursor-pointer">
                         Remove from Chat
                       </p>
                     </div>

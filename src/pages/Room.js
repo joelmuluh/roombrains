@@ -18,12 +18,18 @@ function Room() {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
-  let peer = new Peer(undefined, {
+  const peer = new Peer(undefined, {
     host: process.env.REACT_APP_HOST,
     secure: true,
     port: 443,
     path: "/peer",
   });
+  //For development purposes
+  // let peer = new Peer(undefined, {
+  //   host: process.env.REACT_APP_HOST,
+  //   port: 5000,
+  //   path: "/peer",
+  // });
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -36,7 +42,6 @@ function Room() {
   const { username, userId, image } = info;
 
   const getRoom = async () => {
-    dispatch({ type: "GET_PEER", payload: peer });
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/room/${meetingId}`,
@@ -49,6 +54,15 @@ function Room() {
 
       if (response.data.exists) {
         if (!response.data.roomData.blocked.includes(user._id)) {
+          dispatch({ type: "GET_PEER", payload: peer });
+          dispatch({
+            type: "BLOCKED_USERS_ID",
+            payload: response.data.roomData.blocked,
+          });
+          dispatch({
+            type: "INITIAL_STREAMERS",
+            payload: response.data.roomData.conversationId,
+          });
           setRoomData(response.data.roomData);
           document.title = response.data.roomData.name;
           socket.emit("join-conversation", {
@@ -56,10 +70,7 @@ function Room() {
             userId,
             username,
           });
-          dispatch({
-            type: "INITIAL_STREAMERS",
-            payload: response.data.roomData.conversationId,
-          });
+
           socket.emit("send_participants", {
             conversationId: response.data.roomData.conversationId,
             _id: user._id,
@@ -67,15 +78,17 @@ function Room() {
             image: user.image,
           });
 
-          if (peer.id) {
-            socket.emit("new-connection", {
-              conversationId: response.data.roomData.conversationId,
-              _id: user._id,
-              username,
-              peerId: peer.id,
-              image: user.image,
-            });
-          } else console.log("Not getting Id");
+          peer.on("open", (id) => {
+            if (id) {
+              socket.emit("new-connection", {
+                conversationId: response.data.roomData.conversationId,
+                _id: user._id,
+                username,
+                peerId: id,
+                image: user.image,
+              });
+            } else console.log("Not getting Id");
+          });
           if (response.data.roomData.creator === user._id) {
             dispatch({
               type: "INITIAL_STREAMING_STATE",
@@ -119,7 +132,7 @@ function Room() {
       ) : (
         <div className="h-[100vh] text-white">
           <div className="flex h-full bg-[#1C1C1C]">
-            <div className="bg-[#1C1C1C] hidden show-nav h-[50px] w-full fixed flex justify-between items-center">
+            <div className="bg-[#1C1C1C] hidden show-nav w-full fixed flex justify-between items-center">
               {!showSidebar && (
                 <div
                   className={`z-[2] xl:hidden absolute top-[0.7rem] left-[1rem]`}
@@ -157,7 +170,7 @@ function Room() {
               setShowSidebar={setShowSidebar}
               showSidebar={showSidebar}
             />
-            <div className="xl:flex-[0.55] flex-1 pt-[3rem] xl:py-[1rem] xl:mt-0 bg-[#1C1C1C] h-full overflow-y-auto overflow-x-hidden">
+            <div className="xl:flex-[0.55] flex-1 pt-[2rem] lg:pt-[3rem] xl:py-[1rem] xl:mt-0 bg-[#1C1C1C] h-full overflow-y-auto overflow-x-hidden">
               <Container
                 roomData={roomData}
                 setShowMobileChat={setShowMobileChat}

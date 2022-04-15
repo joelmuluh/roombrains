@@ -6,7 +6,7 @@ import { ImBlocked } from "react-icons/im";
 import { HiCode } from "react-icons/hi";
 import { VscEditorLayout } from "react-icons/vsc";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 function ChatPopup({
   username,
@@ -25,9 +25,11 @@ function ChatPopup({
   const socket = useSelector((state) => state.streams.socket);
   const [hasEditorAccess, setHasEditorAccess] = useState(false);
   const [hasWhiteboardAccess, setHasWhiteboardAccess] = useState(false);
+  const dispatch = useDispatch();
+
   const blockMember = async () => {
     setBlocked(true);
-    socket.emit("block-user", { conversationId, _id: _id });
+    socket.emit("block-user", { conversationId, _id });
     try {
       const response = await axios.delete(
         `${process.env.REACT_APP_API}/room/block/${roomData._id}/${_id}`,
@@ -42,6 +44,15 @@ function ChatPopup({
         setAlertMessage(`You had already blocked ${username}`);
         setShowAlert(true);
       } else {
+        dispatch({
+          type: "BLOCK_USER",
+          payload: {
+            conversationId: roomData.conversationId,
+            _id,
+            image,
+            username,
+          },
+        });
         setShowPopup(false);
         setAlertMessage(`${username} has been blocked`);
         setShowAlert(true);
@@ -66,6 +77,7 @@ function ChatPopup({
       socket.emit("stream-invitation", {
         conversationId,
         userId: _id,
+        username,
         adminName: roomData.creatorName,
       });
       if (setShowMobileChat) {

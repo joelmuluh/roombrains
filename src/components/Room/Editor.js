@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
-import { Button } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import { BsFillPlayFill } from "react-icons/bs";
 import { VscChromeClose } from "react-icons/vsc";
 import AceEditor from "react-ace";
@@ -12,6 +12,7 @@ import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-python";
 
 import { useOutletContext } from "react-router-dom";
+import Loader from "../Loader";
 function Editor() {
   const {
     Invitation,
@@ -40,7 +41,9 @@ function Editor() {
   } = useOutletContext();
   const [codeFontSize, setCodeFontSize] = useState(20);
   const [showPopup, setShowPopup] = useState(false);
-
+  const [output, setOutput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [input, setInput] = useState("");
   const writeCode = (e) => {
     setCode(e);
     const myEditorAccess = JSON.parse(
@@ -55,6 +58,7 @@ function Editor() {
           conversationId: roomData.conversationId,
           userId: user._id,
           code: e,
+          username: user.username,
         });
       }
     }
@@ -65,16 +69,74 @@ function Editor() {
       setCodeFontSize(15);
     }
   }, []);
-  const runCode = () => {
-    setShowPopup(true);
+  const runWithoutEvent = async (code, language, input) => {
+    setLoading(true);
+    try {
+      const { data } = await axios.post(
+        `${process.env.REACT_APP_API}/room/code/compile`,
+        {
+          code,
+          language,
+          input: input.trim() === "" ? "" : input,
+        },
+        {
+          headers: {
+            authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+      setLoading(false);
+      return data.output;
+    } catch (error) {
+      setLoading(false);
+      setInput("");
+      setShowPopup(false);
+      console.log(error.message);
+    }
   };
+  const runCode = async () => {
+    let selectedLanguage;
+    if (language === "c_cpp") {
+      selectedLanguage = "cpp";
+    } else if (language === "java") {
+      selectedLanguage = "java";
+    } else {
+      selectedLanguage = "py";
+    }
+    const codeOutput = await runWithoutEvent(code, selectedLanguage, input);
+    setInput("");
+    setShowPopup(false);
+    setOutput(codeOutput);
+    const myEditorAccess = JSON.parse(
+      window.localStorage.getItem("myEditorAccess")
+    );
+    if (myEditorAccess || roomData.creator === user._id) {
+      if (
+        myEditorAccess?.includes(roomData.conversationId) ||
+        roomData.creator === user._id
+      ) {
+        socket.emit("code_output", {
+          output: codeOutput,
+          conversationId: roomData.conversationId,
+        });
+      }
+    }
+  };
+
+  socket.off("code_output").on("code_output", (data) => {
+    setOutput(data.output);
+  });
   return (
-    <div className="h-full ">
-      <div className="h-[80%]">
-        <div className="bg-[#005FEE] px-[1rem]">
-          <div>
+    <div className="h-full mt-[1rem] md:mt-0 overflow-y-auto">
+      <div className={`h-[70%] lg:h-[80%]`}>
+        <div
+          className={`bg-green-500 sticky top-0 left-0 w-full z-[20] ${
+            streamsData.streams.length > 0 ? "h-[14%]" : "h-[7%]"
+          }`}
+        >
+          <>
             {streamsData.streams.length > 0 && (
-              <div className="small-video-wrapper gap-[1rem] ">
+              <div className="small-video-wrapper gap-[1rem] h-[60%] bg-[#1F1F1F] px-[1rem]">
                 {streamsData?.streams
                   ?.filter(
                     (stream) =>
@@ -93,24 +155,38 @@ function Editor() {
                   ))}
               </div>
             )}
-          </div>
+          </>
 
-          <div className="flex justify-between items-center">
+          <div
+            className={`flex px-[1rem] justify-between items-center bg-[#005FEE] ${
+              streamsData.streams.length <= 0 ? "h-full" : "h-[40%]"
+            }`}
+          >
             <SelectLanguage
               language={language}
               setLanguage={setLanguage}
               user={user}
               roomData={roomData}
               socket={socket}
+              streamsData={streamsData}
             />
-            <Button
-              onClick={() => runCode()}
-              variant="contained"
-              color="primary"
-              startIcon={<BsFillPlayFill className="text-green-500" />}
+            <div
+              className={`${
+                streamsData.streams.length > 0
+                  ? "h-full lg:h-[90%]"
+                  : "h-[35px]"
+              }`}
             >
-              Run
-            </Button>
+              <Button
+                onClick={() => setShowPopup(true)}
+                variant="contained"
+                color="primary"
+                startIcon={<BsFillPlayFill className="text-green-500" />}
+                sx={{ height: "100%" }}
+              >
+                Run
+              </Button>
+            </div>
           </div>
         </div>
         <AceEditor
@@ -125,11 +201,23 @@ function Editor() {
             fontSize: codeFontSize,
           }}
           value={code}
-          className="editor"
+          className={`${
+            streamsData.streams.length > 0 ? "editor-80" : "editor-93"
+          }`}
           readOnly={false}
         />
       </div>
-      <div className="h-[20%] overflow-y-auto bg-[#263238] flex items-center justify-center"></div>
+      <div className={`h-[30%] lg:h-[20%]`}>
+        <h1 className="font-semibold text-center py-[0.3rem]">Output</h1>
+        <div
+          style={{
+            whiteSpace: "pre-line",
+          }}
+          className="bg-[#263238] h-full px-[1rem] md:px-[2rem] pt-[1rem]  overflow-y-auto text-[14px] md:text-[16px] pb-[1rem]"
+        >
+          {output}
+        </div>
+      </div>
       <>
         {receivedInvitation && (
           <Invitation
@@ -149,24 +237,53 @@ function Editor() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="bg-[white] w-[90%] mx-auto px-[1rem] py-[1.5rem] max-h-[500px] max-w-[500px] text-black rounded-[4px]"
+              className="bg-[white] w-[90%] mx-auto px-[1rem] py-[0.7rem] max-h-[500px] max-w-[500px] text-black rounded-[4px] pb-[1.5rem] overflow-y-auto"
             >
-              <h1 className="font-semibold text-black text-[20px]">
-                Coming Soon!!!
-              </h1>
               <p className="my-[1.5rem] text-[13px] lg:text-[16px]">
-                For now, to interact with other developers, You can use the
-                screen-share feature to enable them watch you code. While the
-                compilation feature is being built, You can only use this editor
-                to write code for everyone to see in real-time but without
-                compilation.
+                If your program requires any input, then enter the input value
+                or values here line by line.
               </p>
-              <i className="font-semibold text-18px">Happy Coding!</i>
+              <TextField
+                label="input"
+                variant="filled"
+                className="w-full mt-[10px] text-white"
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                }}
+                spellCheck={false}
+                multiline
+                sx={{
+                  // backgroundColor: "#282A36",
+                  width: "100%",
+                  marginBottom: "14px",
+                  color: "white",
+                }}
+              />
+
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => runCode()}
+                  variant="contained"
+                  color="primary"
+                  startIcon={<BsFillPlayFill className="text-green-500" />}
+                >
+                  Run
+                </Button>
+              </div>
             </div>
             <VscChromeClose
               onClick={() => setShowPopup(false)}
               className="absolute top-[2rem] right-[4rem] text-white text-[30px] font-bold"
             />
+          </div>
+        )}
+        {loading && (
+          <div
+            style={{ transform: "translateX(-50%)" }}
+            className="fixed top-[5rem] left-[50%] z-[1100]"
+          >
+            <Loader />
           </div>
         )}
       </>
@@ -184,10 +301,23 @@ const Stream = ({ stream }) => {
       streamRef.current.play();
     }
   }, []);
-  return <video className="w-[60px] md:w-[100px]" ref={streamRef} autoPlay />;
+  return (
+    <video
+      className="w-[60px] md:w-[100px] h-full max-h-[60px]"
+      ref={streamRef}
+      autoPlay
+    />
+  );
 };
 
-function SelectLanguage({ language, setLanguage, user, roomData, socket }) {
+function SelectLanguage({
+  language,
+  setLanguage,
+  user,
+  roomData,
+  socket,
+  streamsData,
+}) {
   const changeLanguage = (e) => {
     setLanguage(e.target.value);
     const myEditorAccess = JSON.parse(
@@ -213,7 +343,9 @@ function SelectLanguage({ language, setLanguage, user, roomData, socket }) {
       value={language}
       onChange={(e) => changeLanguage(e)}
       variant="outlined"
-      className="my-[7px] text-left h-[2rem] w-[95px] md:w-[100px] bg-white"
+      className={`my-[7px] text-left w-[95px]  md:w-[100px] bg-white ${
+        streamsData.streams.length > 0 ? "h-full lg:h-[90%]" : "h-[35px]"
+      }`}
     >
       <MenuItem value={"c_cpp"}>C/C++</MenuItem>
       <MenuItem value={"java"}>Java</MenuItem>

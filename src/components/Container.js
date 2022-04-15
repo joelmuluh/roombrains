@@ -24,7 +24,11 @@ function Container({ setShowMobileChat, roomData }) {
   const firstName = user.username?.includes(" ")
     ? user?.username.split(" ")[1]
     : user.username;
+
   useEffect(() => {
+    socket.on("disconnect", () => {
+      socket.connect();
+    });
     peer.on("call", (call) => {
       call.answer();
       call.on("stream", (remoteStream) => {
@@ -46,29 +50,6 @@ function Container({ setShowMobileChat, roomData }) {
       });
     });
 
-    socket.off("new-connection").on("new-connection", async (data) => {
-      const streamers = streamsData.streamers.find(
-        (stream) => stream.conversationId === roomData.conversationId
-      );
-      console.log(streamers.myStreamers.includes(user._id));
-      console.log(streamers.myStreamers);
-
-      if (streamers.myStreamers.includes(user._id)) {
-        const streamData = streamsData.streams.find(
-          (stream) =>
-            stream.conversationId === roomData.conversationId &&
-            stream._id === user._id
-        );
-        peer.call(data.peerId, streamData.stream, {
-          metadata: {
-            _id: user._id,
-            image: user.image,
-            username: user.username,
-          },
-        });
-      }
-    });
-
     socket.off("invitation-from-admin").on("invitation-from-admin", (data) => {
       if (data.userId === user._id) {
         setReceivedInvitation(true);
@@ -88,6 +69,7 @@ function Container({ setShowMobileChat, roomData }) {
         peerId: peer?.id,
         conversationId: roomData.conversationId,
         inviteeId: data._id,
+        _id: user._id,
       });
     });
     socket.off("invitation_declined").on("invitation_declined", (data) => {
@@ -95,6 +77,13 @@ function Container({ setShowMobileChat, roomData }) {
         setAlertMessage(
           `Sorry ${firstName}, ${data.username} declined your Invitation`
         );
+        setShowAlert(true);
+      }
+    });
+
+    socket.off("invitee_not_available").on("invitee_not_available", (data) => {
+      if (roomData.creator === user._id) {
+        setAlertMessage(`${data.username} is not presently in this room`);
         setShowAlert(true);
       }
     });
@@ -130,25 +119,9 @@ function Container({ setShowMobileChat, roomData }) {
       setShowAlert(true);
     });
 
-    socket.off("user-disconnected").on("user-disconnected", (data) => {
-      dispatch({
-        type: "REMOVE_STREAM",
-        payload: {
-          conversationId: data.conversationId,
-          _id: data._id,
-        },
-      });
-      dispatch({
-        type: "REMOVE_STREAMER",
-        payload: {
-          conversationId: data.conversationId,
-          _id: data._id,
-        },
-      });
-    });
-
     socket.off("block-user").on("block-user", (data) => {
       if (data._id === user._id) {
+        socket.emit("block-me", data);
         setAlertMessage(
           `${firstName}, the admin of this group just blocked you`
         );
@@ -175,7 +148,6 @@ function Container({ setShowMobileChat, roomData }) {
             navigate("/profile");
           }, 3000);
         }, 4000);
-        socket.emit("block-me", data);
       }
     });
   }, []);
@@ -200,7 +172,7 @@ function Container({ setShowMobileChat, roomData }) {
           type: "ADD_CALL_HANDLER",
           payload: {
             conversationId: roomData.conversationId,
-            _id: user._id,
+            _id: data._id,
             call,
           },
         });
@@ -246,7 +218,7 @@ function Container({ setShowMobileChat, roomData }) {
         type: "ADD_CALL_HANDLER",
         payload: {
           conversationId: roomData.conversationId,
-          _id: user._id,
+          _id: data._id,
           call,
         },
       });
@@ -322,27 +294,6 @@ function Container({ setShowMobileChat, roomData }) {
     if (data._id === user._id) {
       setAlertMessage("You have been unmuted.");
       setShowAlert(true);
-    }
-  });
-
-  socket.off("new-connection").on("new-connection", async (data) => {
-    const streamers = streamsData.streamers.find(
-      (stream) => stream.conversationId === roomData.conversationId
-    );
-
-    if (streamers.myStreamers.includes(user._id)) {
-      const streamData = streamsData.streams.find(
-        (stream) =>
-          stream.conversationId === roomData.conversationId &&
-          stream._id === user._id
-      );
-      peer.call(data.peerId, streamData.stream, {
-        metadata: {
-          _id: user._id,
-          image: user.image,
-          username: user.username,
-        },
-      });
     }
   });
 
@@ -472,6 +423,69 @@ function Container({ setShowMobileChat, roomData }) {
         setLanguage(data.language);
       });
   }, []);
+
+  socket.off("user-disconnected").on("user-disconnected", (data) => {
+    dispatch({
+      type: "REMOVE_STREAM",
+      payload: {
+        conversationId: data.conversationId,
+        _id: data._id,
+      },
+    });
+
+    const streamers = streamsData.streamers.find(
+      (stream) => stream.conversationId === roomData.conversationId
+    );
+    if (streamers.myStreamers.includes(data._id)) {
+      setAlertMessage(`${data.username} just disconnected`);
+      setShowAlert(true);
+    }
+    if (streamers.myStreamers.includes(user._id)) {
+      dispatch({
+        type: "REMOVE_CALL_HANDLER",
+        payload: {
+          conversationId: roomData.conversationId,
+          _id: data._id,
+        },
+      });
+    }
+
+    dispatch({
+      type: "REMOVE_STREAMER",
+      payload: {
+        conversationId: data.conversationId,
+        _id: data._id,
+      },
+    });
+  });
+
+  socket.off("new-connection").on("new-connection", async (data) => {
+    const streamers = streamsData.streamers.find(
+      (stream) => stream.conversationId === roomData.conversationId
+    );
+    if (streamers.myStreamers.includes(user._id)) {
+      const streamData = streamsData.streams.find(
+        (stream) =>
+          stream.conversationId === roomData.conversationId &&
+          stream._id === user._id
+      );
+      const call = peer.call(data.peerId, streamData.stream, {
+        metadata: {
+          _id: user._id,
+          image: user.image,
+          username: user.username,
+        },
+      });
+      dispatch({
+        type: "ADD_CALL_HANDLER",
+        payload: {
+          conversationId: roomData.conversationId,
+          _id: data._id,
+          call,
+        },
+      });
+    }
+  });
 
   return (
     <>

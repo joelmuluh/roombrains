@@ -14,9 +14,14 @@ body {
   overflow-y: auto;
 }
 
-.editor {
+.editor-93 {
   width: 100% !important;
-  height: 90% !important;
+  height: 93% !important;
+  word-wrap: break-word;
+}
+.editor-80 {
+  width: 100% !important;
+  height: 86% !important;
   word-wrap: break-word;
 }
 
@@ -48,6 +53,10 @@ body {
 
 .loader {
   animation: load 0.3s linear infinite;
+}
+.canvas-board {
+  -ms-touch-action: none;
+  touch-action: none;
 }
 
 @keyframes load {
@@ -137,9 +146,7 @@ body {
   grid-template-columns: 1fr 1fr;
 }
 
-@media (max-width: 1200px) {
-}
-@media (max-width: 1024px) {
+@media (max-width: 1280px) {
   .profile-container {
     height: 100vh;
   }
@@ -160,6 +167,10 @@ body {
     z-index: 600;
     transition: 600ms;
     flex: none;
+  }
+  .video-wrapper {
+    width: 80%;
+    margin: 0 auto;
   }
 }
 
@@ -208,13 +219,16 @@ body {
 
 @media (max-width: 600px) {
   .mobile-max-width {
-    width: 80%;
+    width: 65%;
     margin: 0 auto;
+  }
+  .video-wrapper {
+    width: 90%;
   }
 }
 @media (max-width: 500px) {
   .mobile-max-width {
-    width: 87%;
+    width: 70%;
     margin: 0 auto;
   }
   .video-wrapper {
@@ -232,6 +246,10 @@ body {
   .show-sidebar {
     width: 75%;
   }
+  .video-wrapper {
+    width: 80%;
+    margin: 0 auto;
+  }
 }
 @media (max-width: 320px) {
   .profile-btn {
@@ -242,6 +260,14 @@ body {
   .profile-logout {
     font-size: 15px;
     padding: 0 0.7rem;
+  }
+  .video-wrapper {
+    width: 90%;
+    margin: 0 auto;
+  }
+  .mobile-max-width {
+    width: 80%;
+    margin: 0 auto;
   }
 }
 

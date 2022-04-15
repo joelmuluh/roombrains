@@ -1,4 +1,4 @@
-const user = localStorage.getItem("user")
+let user = localStorage.getItem("user")
   ? JSON.parse(localStorage.getItem("user"))
   : null;
 
@@ -21,7 +21,7 @@ export const userReducer = (state = initialState, action) => {
       };
     case "USER_LOGOUT":
       localStorage.removeItem("user");
-      return state;
+      return {};
     case "UPDATE_DETAIL":
       localStorage.setItem("user", JSON.stringify(action.payload));
       return { ...state, ...action.payload };

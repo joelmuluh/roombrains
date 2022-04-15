@@ -26,8 +26,8 @@ function About() {
   } = useOutletContext();
 
   return (
-    <div className="lg:px-[2.5rem] w-[90%] sm:w-[75%] md:w-[80%] mx-auto h-full">
-      <div className="pb-[1rem] border-b border-[rgba(255,255,255,0.1)]">
+    <div className="lg:px-[2.5rem] w-[90%] sm:w-[75%] md:w-[80%] mx-auto h-full pb-[3rem]">
+      <div className="pb-[1rem] px-[1rem] border-b border-[rgba(255,255,255,0.1)]">
         <h1 className="font-bold text-[1rem] lg:text-[1.5rem]  text-center">
           {roomData?.name}
         </h1>

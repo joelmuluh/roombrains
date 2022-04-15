@@ -22,11 +22,13 @@ function Profile() {
   const [loading, setLoading] = useState(false);
 
   const user = useSelector((state) => state.user);
+  const socket = useSelector((state) => state.streams.socket);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const logout = () => {
     dispatch({ type: "USER_LOGOUT" });
+    socket.emit("user_logged_out");
     navigate("/login");
   };
 
@@ -77,7 +79,7 @@ function Profile() {
 
   return (
     <div className="profile-container overflow-y-auto pb-[2rem] lg:pb-[5rem] h-[100vh] bg-[#1F1F1F] text-white">
-      <Header />
+      {!showJoinRoom && !showCreateRoom && <Header />}
       <div className="w-[100%] md:max-w-[600px] lg:max-w-[800px] mx-auto profile-width">
         <div className="pt-[2.5rem]">
           <h1 className="account-header mb-[1.5rem] px-[1rem] lg:px-0 lg:mb-[3rem] font-[400] text-[1.2rem] lg:text-[2rem]">
@@ -341,7 +343,6 @@ const ShowEmail = ({ setLoading }) => {
           setLoading(false);
           setShowAlert(true);
           setEmail("");
-          console.log(data);
           dispatch({ type: "UPDATE_DETAIL", payload: data });
         } catch (error) {
           console.log(error);

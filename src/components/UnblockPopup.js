@@ -2,7 +2,7 @@ import React from "react";
 import { VscChromeClose } from "react-icons/vsc";
 import axios from "axios";
 import Avatar from "@mui/material/Avatar";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 function UnblockPopup({
   setShowUnblockPopup,
   username,
@@ -14,9 +14,7 @@ function UnblockPopup({
   setBlocked,
 }) {
   const user = useSelector((state) => state.user);
-  const streamsData = useSelector((state) => state.streams);
-  const socket = useSelector((state) => state.streams.socket);
-
+  const dispatch = useDispatch();
   const unblockMember = async () => {
     setBlocked(false);
     try {
@@ -28,6 +26,13 @@ function UnblockPopup({
           },
         }
       );
+      dispatch({
+        type: "UNBLOCK_USER",
+        payload: {
+          conversationId: roomData.conversationId,
+          _id,
+        },
+      });
     } catch (error) {
       console.log(error.message);
     }

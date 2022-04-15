@@ -43,17 +43,10 @@ function WhiteBoard() {
     setContext(CanvasContent);
   }, []);
   window.addEventListener("resize", () => {
-    const image = context.getImageData(
-      0,
-      0,
-      container.current.clientWidth,
-      container.current.clientHeight
-    );
-    canvasRef.current.height = container.current.clientHeight;
-    canvasRef.current.width = container.current.clientWidth;
-    context.putImageData(image, 0, 0);
-    const rect = container.current.getBoundingClientRect();
-    context.translate(-rect.x, -rect.y);
+    canvasRef.current.height = container.current?.clientHeight;
+    canvasRef.current.width = container.current?.clientWidth;
+    const rect = container?.current?.getBoundingClientRect();
+    context?.translate(-rect.x, -rect.y);
   });
   const mouseDown = () => {
     setDrawing(true);
@@ -263,40 +256,8 @@ function WhiteBoard() {
       }
     }
   }, [newPath]);
-  // useEffect(() => {
-  //   socket.emit("ask_canvas_image_data", {
-  //     conversationId: roomData.conversationId,
-  //     _id: user._id,
-  //   });
-  // }, []);
-
-  // socket.off("ask_canvas_image_data").on("ask_canvas_image_data", (data) => {
-  //   if (context) {
-  //     console.log("Sent the data");
-  //     socket.emit("Get_canvas_image_data", {
-  //       conversationId: roomData.conversationId,
-  //       recipient: data._id,
-  //       imageData: context.getImageData(
-  //         0,
-  //         0,
-  //         container.current.clientWidth,
-  //         container.current.clientHeight
-  //       ),
-  //     });
-  //   }
-  // });
-
-  // socket.off("Get_canvas_image_data").on("Get_canvas_image_data", (data) => {
-  //   console.log("got the data");
-  //   if (context) {
-  //     if (data.recipient === user._id) {
-  //       context.putImageData(data.imageData, 0, 0);
-  //     }
-  //   }
-  // });
-
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto pt-[1rem]">
       <div className="sticky top-0 x-0 w-full bg-[#1F1F1F] px-[1rem]">
         {streamsData.streams.length > 0 && (
           <div className="py-[0.8rem] small-video-wrapper gap-[1rem] ">
@@ -343,7 +304,7 @@ function WhiteBoard() {
           onTouchStart={(e) => touchStart(e)}
           onTouchEnd={(e) => touchEnd(e)}
           onTouchMove={(e) => touchMove(e)}
-          className="board bg-white overflow-y-hidden"
+          className="canvas-board bg-white overflow-y-hidden"
         ></canvas>
       </div>
 

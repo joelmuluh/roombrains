@@ -50,10 +50,16 @@ function JoinRoom({ setShowJoinRoom }) {
     }
   };
   return (
-    <div className="fixed z-[10] top-0 bottom-0 left-0 right-0 bg-[#1F1F1F] scale-in text-black flex items-center lg:block">
-      <div className=" mt-[1.5rem] lg:mt-[2.5rem] max-w-[800px] w-[80%] mx-auto lg:mt-[4rem">
-        <div className="flex lg:mb-[2rem] lg:mb-[3rem] lg:block justify-between items-center px-[1rem] lg:px-0 pb-[1rem]">
-          <h1 className="  font-[400] text-[1rem] lg:text-[1.5rem] lg:text-[2rem] text-white">
+    <div
+      onClick={() => setShowJoinRoom(false)}
+      className="fixed z-[10] top-0 bottom-0 left-0 right-0 bg-[#1F1F1F] scale-in text-black flex items-center lg:block"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="max-w-[800px] w-[80%] mx-auto  mt-[1.5rem] lg:mt-[2.5rem] lg:mt-[4rem"
+      >
+        <div className="flex lg:mb-[2rem] lg:mb-[3rem] justify-between items-center px-[1rem] lg:px-0 pb-[1rem]">
+          <h1 className="font-[400] text-[1rem] lg:text-[1.5rem] lg:text-[2rem] text-white">
             Join Room
           </h1>
           <VscChromeClose

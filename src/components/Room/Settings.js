@@ -4,10 +4,13 @@ import { BiClipboard } from "react-icons/bi";
 import copy from "copy-to-clipboard";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import Loader from "../Loader";
 import DeleteRoom from "../DeleteRoom";
 import CheckPopup from "../CheckPopup";
+import ShowBlockedUsers from "../ShowBlockedUsers";
+import { useSelector } from "react-redux";
 function Settings() {
   const {
     Alert,
@@ -36,8 +39,15 @@ function Settings() {
   const [loading, setLoading] = useState(false);
   const [generateNewId, setGenerateNewId] = useState(false);
   const [description, setDescription] = useState(roomData?.description);
+  const [selectedOption, setSelectedOption] = useState("More functions");
+  const [showBlockedPopup, setShowBlockedPopup] = useState(false);
+  const blockedUsers = useSelector((state) => state.myRooms.blockedUsers);
+  const blocked_users_id = useSelector(
+    (state) => state.myRooms.blocked_users_id
+  );
+
   const copyLinkToClipboard = () => {
-    copy(`${process.env.REACT_APP_API}/rooms/${roomData.meetingId}`);
+    copy(`${window.location.origin}/rooms/${roomData.meetingId}`);
     setAlertMessage("Link has been copied to clipboard");
     setShowAlert(true);
   };
@@ -106,16 +116,49 @@ function Settings() {
     } catch (error) {}
   };
 
-  useEffect(() => {
-    socket.off("invitation-accepted").on("invitation-accepted", (data) => {
-      if (roomData.creator === user._id) {
-        setAlertMessage(`${data.username} just accepted your invitation`);
-        setShowAlert(true);
+  const changeOption = (e) => {
+    setSelectedOption(e.target.value);
+    switch (e.target.value) {
+      case "blocked_users":
+        setShowBlockedPopup(true);
+        break;
+      default:
+        return "";
+    }
+  };
+
+  const getUser = async (userId) => {
+    const { data } = await axios.get(
+      `${process.env.REACT_APP_API}/users/find/${userId}`,
+      {
+        headers: {
+          authorization: `Bearer ${user?.token}`,
+        },
       }
-    });
+    );
+    return data;
+  };
+  const dispatchBlockedUsers = async () => {
+    if (blocked_users_id.length !== 0) {
+      if (blockedUsers.length === 0) {
+        const userDetails = await Promise.all(
+          blocked_users_id.map(async (userId) => {
+            return getUser(userId);
+          })
+        );
+        const usersForDispatch = userDetails.map((user) => {
+          return { conversationId: roomData.conversationId, ...user };
+        });
+        dispatch({ type: "FILL_BLOCK", payload: usersForDispatch });
+      }
+    }
+  };
+  useEffect(() => {
+    dispatchBlockedUsers();
   }, []);
+
   return (
-    <div className="h-full px-[1rem]">
+    <div className="h-full px-[1rem] pb-[4rem]">
       {showAlert && <Alert text={alertMessage} setShowAlert={setShowAlert} />}
       {loading && (
         <div
@@ -139,13 +182,31 @@ function Settings() {
           setShowDeletePopup={setShowDeletePopup}
         />
       )}
+      {showBlockedPopup && (
+        <ShowBlockedUsers
+          showPopup={setShowBlockedPopup}
+          setSelectedOption={setSelectedOption}
+          user={user}
+          roomData={roomData}
+        />
+      )}
 
-      <div className="pb-[1rem] border-b border-[rgba(255,255,255,0.1)]">
-        <h1 className="font-bold text-[1rem] lg:text-[1.5rem]  text-center">
+      <div className="pb-[1rem] px-[1rem] border-b border-[rgba(255,255,255,0.1)]">
+        <h1 className="font-bold text-[1rem] lg:text-[1.5rem] text-center">
           {roomData?.name}
         </h1>
       </div>
-
+      <Select
+        labelId="demo-simple-select-filled-label"
+        id="demo-simple-select-filled"
+        value={"actions"}
+        onChange={(e) => changeOption(e)}
+        variant="outlined"
+        className="my-[7px] text-left w-[70%] md:w-[150px] h-[35px] md:w-[100px] bg-white my-[1rem] lg:ml-[2rem]"
+      >
+        <MenuItem value={"actions"}>Actions</MenuItem>
+        <MenuItem value={"blocked_users"}>Blocked users</MenuItem>
+      </Select>
       <div
         className={`pt-[1.5rem] lg:px-[2rem] ${
           !filled && "space-y-[1rem]"
@@ -189,7 +250,7 @@ function Settings() {
               style={{ wordBreak: "break-all" }}
               className="text-white opacity-[0.59] text-[12px] md:text-[1rem]"
             >
-              {process.env.REACT_APP_API}/rooms/{roomData?.meetingId}
+              {window.location.origin}/rooms/{roomData.meetingId}
             </span>
           </div>
         </div>
@@ -227,13 +288,13 @@ function Settings() {
         <div className="flex justify-between">
           <button
             onClick={() => saveChanges()}
-            className="text-white bg-[#005FEE] h-[50px] w-[90px] border-none"
+            className="text-white bg-[#005FEE] h-[35px] md:h-[50px] w-[90px] border-none text-[14px] lg:text-[16px]"
           >
             Save
           </button>
           <button
             onClick={() => setShowDeletePopup(true)}
-            className="text-white bg-red-700 h-[50px] w-[120px] border-none"
+            className="text-white bg-red-700 h-[35px] md:h-[50px] w-[100px] text-[14px] lg:text-[16px] lg:w-[120px] border-none"
           >
             Delete Room
           </button>
