@@ -24,8 +24,8 @@ function Room() {
     port: 443,
     path: "/peer",
   });
-  //For development purposes
-  // let peer = new Peer(undefined, {
+  // // For development purposes
+  // const peer = new Peer(undefined, {
   //   host: process.env.REACT_APP_HOST,
   //   port: 5000,
   //   path: "/peer",
@@ -59,10 +59,6 @@ function Room() {
             type: "BLOCKED_USERS_ID",
             payload: response.data.roomData.blocked,
           });
-          dispatch({
-            type: "INITIAL_STREAMERS",
-            payload: response.data.roomData.conversationId,
-          });
           setRoomData(response.data.roomData);
           document.title = response.data.roomData.name;
           socket.emit("join-conversation", {
@@ -89,13 +85,6 @@ function Room() {
               });
             } else console.log("Not getting Id");
           });
-          if (response.data.roomData.creator === user._id) {
-            dispatch({
-              type: "INITIAL_STREAMING_STATE",
-              payload: response.data.roomData.conversationId,
-            });
-          } else {
-          }
 
           setLoading(false);
           navigate("home");
@@ -170,7 +159,7 @@ function Room() {
               setShowSidebar={setShowSidebar}
               showSidebar={showSidebar}
             />
-            <div className="xl:flex-[0.55] flex-1 pt-[2rem] lg:pt-[3rem] xl:py-[1rem] xl:mt-0 bg-[#1C1C1C] h-full overflow-y-auto overflow-x-hidden">
+            <div className="xl:flex-[0.55] flex-1 pt-[1.5rem] lg:pt-[1rem] xl:mt-0 bg-[#1C1C1C] h-full overflow-y-auto overflow-x-hidden custom-scrollbar">
               <Container
                 roomData={roomData}
                 setShowMobileChat={setShowMobileChat}

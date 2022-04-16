@@ -193,7 +193,9 @@ function WhiteBoard() {
 
   const clearCanvas = () => {
     clear();
-
+    setEraserActive(false);
+    setColor("black");
+    setLineWidth("10");
     const myWhiteboardAccess = JSON.parse(
       window.localStorage.getItem("myWhiteboardAccess")
     );
@@ -225,6 +227,12 @@ function WhiteBoard() {
       if (context) {
         context.strokeStyle = canvasData.color;
         context.lineWidth = canvasData.lineWidth;
+        // if(window.innerWidth <= 400) {
+        //   context.lineWidth = canvasData.lineWidth;
+        // }
+        // else {
+        //   context.lineWidth = canvasData.lineWidth;
+        // }
         const xValue =
           (canvasData.canvasData?.x * container.current.clientWidth) / 100;
         const yValue =
@@ -261,21 +269,18 @@ function WhiteBoard() {
       <div className="sticky top-0 x-0 w-full bg-[#1F1F1F] px-[1rem]">
         {streamsData.streams.length > 0 && (
           <div className="py-[0.8rem] small-video-wrapper gap-[1rem] ">
-            {streamsData?.streams
-              ?.filter(
-                (stream) => stream.conversationId === roomData.conversationId
-              )
-              .map((streamData) => (
-                <Stream
-                  key={streamData._id}
-                  _id={streamData._id}
-                  stream={streamData?.stream}
-                  image={streamData.image}
-                  username={streamData.username}
-                  conversationId={roomData.conversationId}
-                  streamsData={streamsData}
-                />
-              ))}
+            {streamsData?.streams.map((streamData) => (
+              <Stream
+                key={streamData._id}
+                _id={streamData._id}
+                stream={streamData?.stream}
+                image={streamData.image}
+                username={streamData.username}
+                conversationId={roomData.conversationId}
+                streamsData={streamsData}
+                user={user}
+              />
+            ))}
           </div>
         )}
         <div className="flex justify-between text-[13px] lg:text-[15px]">
@@ -327,12 +332,17 @@ function WhiteBoard() {
 
 export default WhiteBoard;
 
-const Stream = ({ stream }) => {
+const Stream = ({ stream, _id, user, streamsData }) => {
   const streamRef = useRef();
   useEffect(() => {
     if (streamRef) {
-      streamRef.current.srcObject = stream;
-      streamRef.current.play();
+      if (_id === user._id && streamsData.screenStream.screening) {
+        streamRef.current.srcObject = streamsData.screenStream.stream;
+        streamRef.current.play();
+      } else {
+        streamRef.current.srcObject = stream;
+        streamRef.current.play();
+      }
     }
   }, []);
   return <video className="w-[60px] md:w-[100px]" ref={streamRef} autoPlay />;

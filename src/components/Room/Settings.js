@@ -192,7 +192,7 @@ function Settings() {
       )}
 
       <div className="pb-[1rem] px-[1rem] border-b border-[rgba(255,255,255,0.1)]">
-        <h1 className="font-bold text-[1rem] lg:text-[1.5rem] text-center">
+        <h1 className="font-[500] p-[10px] text-[13px] lg:text-[16px] text-center">
           {roomData?.name}
         </h1>
       </div>
@@ -285,7 +285,7 @@ function Settings() {
             />
           </div>
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between pb-[2.5rem]">
           <button
             onClick={() => saveChanges()}
             className="text-white bg-[#005FEE] h-[35px] md:h-[50px] w-[90px] border-none text-[14px] lg:text-[16px]"

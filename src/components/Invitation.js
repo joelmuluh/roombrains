@@ -20,12 +20,9 @@ function Invitation({
   const firstName = user.username.includes(" ")
     ? user.username.split(" ")[1]
     : user.username;
-  const navigate = useNavigate();
   const acceptionInvitation = async () => {
-    const streams = streamsData.streamers.find(
-      (stream) => stream.conversationId === conversationId
-    );
-    if (streams.myStreamers.length >= 4) {
+    const streamers = streamsData.streamers;
+    if (streamers.length >= 4) {
       setAlertMessage(
         `Sorry ${user.username} the admin has already invited more than 4 people`
       );

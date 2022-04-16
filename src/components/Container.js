@@ -37,13 +37,11 @@ function Container({ setShowMobileChat, roomData }) {
           image: call.metadata.image,
           username: call.metadata.username,
           stream: remoteStream,
-          conversationId: roomData.conversationId,
         };
         dispatch({ type: "ADD_STREAM", payload });
         dispatch({
           type: "ADD_STREAMER",
           payload: {
-            conversationId: roomData.conversationId,
             _id: call.metadata._id,
           },
         });
@@ -104,14 +102,12 @@ function Container({ setShowMobileChat, roomData }) {
       dispatch({
         type: "REMOVE_STREAM",
         payload: {
-          conversationId: roomData.conversationId,
           _id: data._id,
         },
       });
       dispatch({
         type: "REMOVE_STREAMER",
         payload: {
-          conversationId: roomData.conversationId,
           _id: data._id,
         },
       });
@@ -135,14 +131,12 @@ function Container({ setShowMobileChat, roomData }) {
               type: "REMOVE_STREAM",
               payload: {
                 _id: user._id,
-                conversationId: roomData.conversationId,
               },
             });
             dispatch({
               type: "REMOVE_STREAMER",
               payload: {
                 _id: user._id,
-                conversationId: roomData.conversationId,
               },
             });
             navigate("/profile");
@@ -171,7 +165,6 @@ function Container({ setShowMobileChat, roomData }) {
         dispatch({
           type: "ADD_CALL_HANDLER",
           payload: {
-            conversationId: roomData.conversationId,
             _id: data._id,
             call,
           },
@@ -182,9 +175,7 @@ function Container({ setShowMobileChat, roomData }) {
   socket.off("peerId_to_invitee").on("peerId_to_invitee", async (data) => {
     if (data.inviteeId === user._id) {
       const localstream = streamsData.streams.find(
-        (stream) =>
-          stream._id === user._id &&
-          stream.conversationId === roomData?.conversationId
+        (stream) => stream._id === user._id
       );
 
       dispatch({
@@ -194,14 +185,12 @@ function Container({ setShowMobileChat, roomData }) {
           username: user.username,
           image: user.image,
           stream: localstream.stream,
-          conversationId: roomData?.conversationId,
         },
       });
 
       dispatch({
         type: "ADD_STREAMER",
         payload: {
-          conversationId: roomData?.conversationId,
           _id: user._id,
         },
       });
@@ -217,7 +206,6 @@ function Container({ setShowMobileChat, roomData }) {
       dispatch({
         type: "ADD_CALL_HANDLER",
         payload: {
-          conversationId: roomData.conversationId,
           _id: data._id,
           call,
         },
@@ -229,14 +217,12 @@ function Container({ setShowMobileChat, roomData }) {
     dispatch({
       type: "REMOVE_STREAM",
       payload: {
-        conversationId: data.conversationId,
         _id: data._id,
       },
     });
     dispatch({
       type: "REMOVE_STREAMER",
       payload: {
-        conversationId: data.conversationId,
         _id: data._id,
       },
     });
@@ -247,14 +233,12 @@ function Container({ setShowMobileChat, roomData }) {
     dispatch({
       type: "REMOVE_STREAM",
       payload: {
-        conversationId: data.conversationId,
         _id: data._id,
       },
     });
     dispatch({
       type: "REMOVE_STREAMER",
       payload: {
-        conversationId: data.conversationId,
         _id: data._id,
       },
     });
@@ -271,7 +255,6 @@ function Container({ setShowMobileChat, roomData }) {
     dispatch({
       type: "MUTE_USER",
       payload: {
-        conversationId: data.conversationId,
         _id: data._id,
       },
     });
@@ -286,7 +269,6 @@ function Container({ setShowMobileChat, roomData }) {
       dispatch({
         type: "UNMUTE_USER",
         payload: {
-          conversationId: data.conversationId,
           _id: data._id,
         },
       });
@@ -425,61 +407,55 @@ function Container({ setShowMobileChat, roomData }) {
   }, []);
 
   socket.off("user-disconnected").on("user-disconnected", (data) => {
-    dispatch({
-      type: "REMOVE_STREAM",
-      payload: {
-        conversationId: data.conversationId,
-        _id: data._id,
-      },
-    });
-
-    const streamers = streamsData.streamers.find(
-      (stream) => stream.conversationId === roomData.conversationId
-    );
-    if (streamers.myStreamers.includes(data._id)) {
+    const streamers = streamsData.streamers;
+    if (streamers.includes(data._id)) {
       setAlertMessage(`${data.username} just disconnected`);
       setShowAlert(true);
-    }
-    if (streamers.myStreamers.includes(user._id)) {
       dispatch({
-        type: "REMOVE_CALL_HANDLER",
+        type: "REMOVE_STREAM",
         payload: {
-          conversationId: roomData.conversationId,
+          _id: data._id,
+        },
+      });
+      dispatch({
+        type: "REMOVE_STREAMER",
+        payload: {
           _id: data._id,
         },
       });
     }
-
-    dispatch({
-      type: "REMOVE_STREAMER",
-      payload: {
-        conversationId: data.conversationId,
-        _id: data._id,
-      },
-    });
+    if (streamers.includes(user._id)) {
+      dispatch({
+        type: "REMOVE_CALL_HANDLER",
+        payload: {
+          _id: data._id,
+        },
+      });
+    }
   });
 
   socket.off("new-connection").on("new-connection", async (data) => {
-    const streamers = streamsData.streamers.find(
-      (stream) => stream.conversationId === roomData.conversationId
-    );
-    if (streamers.myStreamers.includes(user._id)) {
+    const streamers = streamsData.streamers;
+    if (streamers.includes(user._id)) {
+      const screenStream = streamsData.screenStream;
       const streamData = streamsData.streams.find(
-        (stream) =>
-          stream.conversationId === roomData.conversationId &&
-          stream._id === user._id
+        (stream) => stream._id === user._id
       );
-      const call = peer.call(data.peerId, streamData.stream, {
+      const myStream = screenStream.screening
+        ? screenStream.stream
+        : streamData.stream;
+
+      const call = peer.call(data.peerId, myStream, {
         metadata: {
           _id: user._id,
           image: user.image,
           username: user.username,
         },
       });
+
       dispatch({
         type: "ADD_CALL_HANDLER",
         payload: {
-          conversationId: roomData.conversationId,
           _id: data._id,
           call,
         },

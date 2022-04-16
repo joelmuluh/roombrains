@@ -128,39 +128,29 @@ function Editor() {
   });
   return (
     <div className="h-full mt-[1rem] md:mt-0 overflow-y-auto">
-      <div className={`h-[70%] lg:h-[80%]`}>
-        <div
-          className={`bg-green-500 sticky top-0 left-0 w-full z-[20] ${
-            streamsData.streams.length > 0 ? "h-[14%]" : "h-[7%]"
-          }`}
-        >
+      <div className={`h-full`}>
+        <div className={`sticky top-0 left-0 w-full z-[20] `}>
           <>
             {streamsData.streams.length > 0 && (
-              <div className="small-video-wrapper gap-[1rem] h-[60%] bg-[#1F1F1F] px-[1rem]">
-                {streamsData?.streams
-                  ?.filter(
-                    (stream) =>
-                      stream.conversationId === roomData.conversationId
-                  )
-                  .map((streamData) => (
-                    <Stream
-                      key={streamData._id}
-                      _id={streamData._id}
-                      stream={streamData?.stream}
-                      image={streamData.image}
-                      username={streamData.username}
-                      conversationId={roomData.conversationId}
-                      streamsData={streamsData}
-                    />
-                  ))}
+              <div className="mb-[0.2rem] md:mt-[1rem] lg:mt-0 small-video-wrapper gap-[1rem] bg-[#1F1F1F] px-[1rem]">
+                {streamsData?.streams.map((streamData) => (
+                  <Stream
+                    key={streamData._id}
+                    _id={streamData._id}
+                    stream={streamData?.stream}
+                    image={streamData.image}
+                    username={streamData.username}
+                    conversationId={roomData.conversationId}
+                    streamsData={streamsData}
+                    user={user}
+                  />
+                ))}
               </div>
             )}
           </>
 
           <div
-            className={`flex px-[1rem] justify-between items-center bg-[#005FEE] ${
-              streamsData.streams.length <= 0 ? "h-full" : "h-[40%]"
-            }`}
+            className={`flex px-[1rem] justify-between items-center bg-[#005FEE] h-[40px] lg:h-[50px] py-[7px] lg:py-[5px]`}
           >
             <SelectLanguage
               language={language}
@@ -173,7 +163,7 @@ function Editor() {
             <div
               className={`${
                 streamsData.streams.length > 0
-                  ? "h-full lg:h-[90%]"
+                  ? "h-[32px] lg:h-[90%]"
                   : "h-[35px]"
               }`}
             >
@@ -189,33 +179,40 @@ function Editor() {
             </div>
           </div>
         </div>
-        <AceEditor
-          mode={language}
-          theme="dracula"
-          onChange={(e) => {
-            writeCode(e);
-          }}
-          name="UNIQUE_ID_OF_DIV"
-          setOptions={{
-            showPrintMargin: false,
-            fontSize: codeFontSize,
-          }}
-          value={code}
-          className={`${
-            streamsData.streams.length > 0 ? "editor-80" : "editor-93"
-          }`}
-          readOnly={false}
-        />
-      </div>
-      <div className={`h-[30%] lg:h-[20%]`}>
-        <h1 className="font-semibold text-center py-[0.3rem]">Output</h1>
-        <div
-          style={{
-            whiteSpace: "pre-line",
-          }}
-          className="bg-[#263238] h-full px-[1rem] md:px-[2rem] pt-[1rem]  overflow-y-auto text-[14px] md:text-[16px] pb-[1rem]"
-        >
-          {output}
+        <div className="h-full w-full mt-[1rem]">
+          <AceEditor
+            mode={language}
+            theme="dracula"
+            onChange={(e) => {
+              writeCode(e);
+            }}
+            name="UNIQUE_ID_OF_DIV"
+            setOptions={{
+              showPrintMargin: false,
+              fontSize: codeFontSize,
+              wrap: true,
+            }}
+            value={code}
+            className={`editor ${
+              output ? "editor-60" : "editor-70"
+            } lg:editor-80 transition duration-200`}
+            readOnly={false}
+          />
+          <div
+            className={`${
+              output ? "h-[30%]" : "h-[30%]"
+            } lg:h-[30%] transition duration-200`}
+          >
+            <h1 className="font-semibold text-center py-[0.3rem]">Output</h1>
+            <div
+              style={{
+                whiteSpace: "pre-line",
+              }}
+              className="bg-[#263238] h-full px-[1rem] md:px-[2rem] py-[1rem]  overflow-y-auto text-[14px] md:text-[16px]"
+            >
+              {output}
+            </div>
+          </div>
         </div>
       </div>
       <>
@@ -254,7 +251,6 @@ function Editor() {
                 spellCheck={false}
                 multiline
                 sx={{
-                  // backgroundColor: "#282A36",
                   width: "100%",
                   marginBottom: "14px",
                   color: "white",
@@ -293,12 +289,17 @@ function Editor() {
 
 export default Editor;
 
-const Stream = ({ stream }) => {
+const Stream = ({ stream, _id, user, streamsData }) => {
   const streamRef = useRef();
   useEffect(() => {
     if (streamRef) {
-      streamRef.current.srcObject = stream;
-      streamRef.current.play();
+      if (_id === user._id && streamsData.screenStream.screening) {
+        streamRef.current.srcObject = streamsData.screenStream.stream;
+        streamRef.current.play();
+      } else {
+        streamRef.current.srcObject = stream;
+        streamRef.current.play();
+      }
     }
   }, []);
   return (
@@ -344,7 +345,7 @@ function SelectLanguage({
       onChange={(e) => changeLanguage(e)}
       variant="outlined"
       className={`my-[7px] text-left w-[95px]  md:w-[100px] bg-white ${
-        streamsData.streams.length > 0 ? "h-full lg:h-[90%]" : "h-[35px]"
+        streamsData.streams.length > 0 ? "h-[32px] lg:h-[90%]" : "h-[35px]"
       }`}
     >
       <MenuItem value={"c_cpp"}>C/C++</MenuItem>

@@ -64,11 +64,9 @@ function ChatPopup({
 
   const sendInvitation = () => {
     setShowPopup(false);
-    const streamArray = streamsData.streamers.find(
-      (stream) => stream.conversationId === roomData.conversationId
-    );
+    const streamArray = streamsData.streamers;
 
-    if (streamArray.myStreamers.length >= 4) {
+    if (streamArray.length >= 4) {
       setAlertMessage("You can't invite more than 4 people");
       setShowAlert(true);
     } else {

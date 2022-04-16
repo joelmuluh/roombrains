@@ -4,6 +4,7 @@ import { FiChevronUp } from "react-icons/fi";
 import { VscChromeClose } from "react-icons/vsc";
 import { FiSettings } from "react-icons/fi";
 import { BsThreeDots } from "react-icons/bs";
+import { GrUndo } from "react-icons/gr";
 import { useDispatch, useSelector } from "react-redux";
 import { getStream } from "../../functions/getStream";
 import { links } from "../../utils/sidelinks";
@@ -19,9 +20,7 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
   const streamsData = useSelector((state) => state.streams);
   const dispatch = useDispatch();
   const conversationId = roomData?.conversationId;
-  const streamingState = streamsData.streaming.find(
-    (streamState) => streamState.conversationId === roomData.conversationId
-  );
+  const streaming = streamsData.streaming;
   window.addEventListener("click", () => {
     setShowSidebar(false);
   });
@@ -124,6 +123,19 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
             url={"settings"}
           />
         )}
+        <ExcuseMe
+          activeLink={activeLink}
+          setShowSidebar={setShowSidebar}
+          setActiveLink={setActiveLink}
+          text={"Excuse me"}
+          icon={<GrUndo className="text-[18px] lg:text-[25px]" />}
+          url={"/profile"}
+          streamsData={streamsData}
+          roomData={roomData}
+          user={user}
+          socket={socket}
+          streaming={streaming}
+        />
       </div>
       {user._id === roomData?.creator && (
         <div className="w-full flex items-center justify-between px-[1rem] mt-[1rem]">
@@ -131,12 +143,12 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
           <div className="flex items-center justify-center space-x-[10px]">
             <div
               className={`${
-                streamingState.value ? "#1492E6" : "bg-[white]"
+                streaming ? "#1492E6" : "bg-[white]"
               } w-[50px] h-[20px] rounded-full bg-white flex items-center`}
             >
               <div
                 onClick={() => {
-                  if (!streamingState.value) {
+                  if (!streaming) {
                     startStream();
                   } else {
                     stopStream();
@@ -144,13 +156,13 @@ function Siderbar({ roomData, showSidebar, setShowSidebar }) {
                   setShowSidebar(false);
                 }}
                 className={`w-[40%] h-[90%] rounded-full bg-[#1492E6] transform ${
-                  streamingState.value
+                  streaming
                     ? "bg-[white] translate-x-[150%] transition duration-[400ms]"
                     : "bg-[#1F1F1F] translate-x-0 transition duration-[400ms]"
                 }`}
               ></div>
             </div>
-            <p>{streamingState.value ? "On" : "Off"}</p>
+            <p>{streaming ? "On" : "Off"}</p>
           </div>
         </div>
       )}
@@ -234,11 +246,72 @@ const Settings = ({
   setShowSidebar,
   text,
   icon,
+  url,
 }) => {
   return (
     <Link
-      to={"settings"}
+      to={url}
       onClick={() => {
+        setActiveLink(text);
+        setShowSidebar(false);
+      }}
+    >
+      <div
+        className={`w-full mt-[0.7rem] hover:bg-[#005FEE] transition duration-[150ms] ease-in py-[10px] px-[1rem] ${
+          activeLink === text && "bg-[#005FEE]"
+        }`}
+      >
+        <div className="flex items-center">
+          {icon}
+          <p
+            className={`text-[17px] ml-[0.8rem] lg:ml-[1.5rem] hover:opacity-[1]  ${
+              activeLink === text ? "opacity-[1]" : "opacity-[0.7]"
+            }`}
+          >
+            {text}
+          </p>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+const ExcuseMe = ({
+  activeLink,
+  setActiveLink,
+  setShowSidebar,
+  text,
+  icon,
+  url,
+  streamsData,
+  roomData,
+  user,
+  socket,
+  streaming,
+}) => {
+  const dispatch = useDispatch();
+  const removeStream = () => {
+    const streamers = streamsData.streamers;
+    if (streamers.includes(user._id)) {
+      socket.emit("user_left_stream", {
+        conversationId: roomData.conversationId,
+        username: user.username,
+        _id: user._id,
+      });
+    }
+    socket.emit("remove_onliner", {
+      conversationId: roomData.conversationId,
+      _id: user._id,
+    });
+    dispatch({
+      type: "RESET_STATE",
+    });
+  };
+  return (
+    <Link
+      to={url}
+      onClick={() => {
+        removeStream();
         setActiveLink(text);
         setShowSidebar(false);
       }}

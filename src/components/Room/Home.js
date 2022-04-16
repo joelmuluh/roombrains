@@ -35,32 +35,28 @@ function Home() {
   } = useOutletContext();
   return (
     <div className="px-[1rem] lg:px-[1.5rem] w-full h-full">
-      <div className="pb-[0.8rem] px-[1rem] lg:pb-[1rem] border-b border-[rgba(255,255,255,0.1)]">
-        <h1 className="font-bold text-[14px] lg:text-[1.5rem] text-center">
+      <div className="pb-[0.6rem] px-[1rem] border-b border-[rgba(255,255,255,0.1)]">
+        <h1 className="font-[500] p-[10px] text-[13px] lg:text-[16px] text-center">
           {roomData?.name}
         </h1>
       </div>
 
       {streamsData.streams.length > 0 ? (
         <div className="pt-[2rem] video-wrapper gap-[1rem] w-[80%] lg:max-w-[900px] lg:mx-auto pb-[5rem]">
-          {streamsData.streams
-            .filter(
-              (stream) => stream.conversationId === roomData.conversationId
-            )
-            .map((streamData) => (
-              <Stream
-                key={streamData._id}
-                _id={streamData._id}
-                stream={streamData.stream}
-                image={streamData.image}
-                username={streamData.username}
-                conversationId={roomData.conversationId}
-                roomData={roomData}
-                peer={peer}
-                streamsData={streamsData}
-                user={user}
-              />
-            ))}
+          {streamsData.streams.map((streamData) => (
+            <Stream
+              key={streamData._id}
+              _id={streamData._id}
+              stream={streamData.stream}
+              image={streamData.image}
+              username={streamData.username}
+              conversationId={roomData.conversationId}
+              roomData={roomData}
+              peer={peer}
+              streamsData={streamsData}
+              user={user}
+            />
+          ))}
         </div>
       ) : (
         <div className="h-[80%] max-w-[600px] mx-auto flex justify-center items-center text-center">
@@ -118,16 +114,22 @@ const Stream = ({
   const [showControlsPopup, setShowControlsPopup] = useState(false);
   useEffect(() => {
     if (streamRef) {
-      streamRef.current.srcObject = stream;
+      if (_id === user._id && streamsData.screenStream.screening) {
+        streamRef.current.srcObject = streamsData.screenStream.stream;
+        streamRef.current.play();
+        setSharingScreen(true);
+      } else {
+        streamRef.current.srcObject = stream;
+        streamRef.current.play();
+      }
     }
-  }, [streamsData]);
+  }, []);
 
   const muteUser = () => {
     setMute(true);
     dispatch({
       type: "MUTE_USER",
       payload: {
-        conversationId,
         _id,
       },
     });
@@ -138,7 +140,6 @@ const Stream = ({
     dispatch({
       type: "UNMUTE_USER",
       payload: {
-        conversationId,
         _id,
       },
     });
@@ -149,7 +150,6 @@ const Stream = ({
     dispatch({
       type: "ENABLE_VIDEO",
       payload: {
-        conversationId,
         _id,
       },
     });
@@ -160,7 +160,6 @@ const Stream = ({
     dispatch({
       type: "DISABLE_VIDEO",
       payload: {
-        conversationId,
         _id,
       },
     });
@@ -171,22 +170,18 @@ const Stream = ({
     dispatch({
       type: "REMOVE_STREAM",
       payload: {
-        conversationId,
         _id,
-        myId: user._id,
       },
     });
     dispatch({
       type: "REMOVE_STREAMER",
       payload: {
-        conversationId,
         _id,
       },
     });
     if (roomData.creator === _id) {
       dispatch({
         type: "STOP_STREAMING",
-        payload: conversationId,
       });
     }
     socket.emit("user_left_stream", {
@@ -202,7 +197,6 @@ const Stream = ({
     dispatch({
       type: "MUTE_USER",
       payload: {
-        conversationId,
         _id,
       },
     });
@@ -217,7 +211,6 @@ const Stream = ({
     dispatch({
       type: "UNMUTE_USER",
       payload: {
-        conversationId,
         _id,
       },
     });
@@ -232,7 +225,6 @@ const Stream = ({
     dispatch({
       type: "REMOVE_STREAM",
       payload: {
-        conversationId,
         _id,
       },
     });
@@ -253,17 +245,19 @@ const Stream = ({
 
   const shareScreen = async () => {
     const screen = await getDisplayMedia();
-    streamRef.current.srcObject = screen;
+    dispatch({ type: "START_SCREEN_STREAM", payload: screen });
+    setTimeout(() => {
+      streamRef.current.srcObject = screen;
+    }, 0);
+
     setSharingScreen(true);
     setShowControlsPopup(false);
     const normalVideo = streamsData.streams.find(
-      (stream) => stream._id === _id && stream.conversationId === conversationId
+      (stream) => stream._id === user._id
     );
-    const screenTrack = screen.getTracks()[0];
+    const screenTrack = screen.getVideoTracks()[0];
 
-    const handlers = streamsData.callHandlers.filter(
-      (callHandler) => callHandler.conversationId === roomData.conversationId
-    );
+    const handlers = streamsData.callHandlers;
 
     if (handlers.length > 0) {
       handlers.forEach((handler) => {
@@ -277,9 +271,8 @@ const Stream = ({
 
     screenTrack.onended = () => {
       streamRef.current.srcObject = normalVideo.stream;
-      const handlers = streamsData.callHandlers.filter(
-        (callHandler) => callHandler.conversationId === roomData.conversationId
-      );
+      dispatch({ type: "STOP_SCREEN_STREAM" });
+      const handlers = streamsData.callHandlers;
       if (handlers.length > 0) {
         handlers.forEach((handler) => {
           handler.call.peerConnection.getSenders().forEach((sender) => {
@@ -295,13 +288,11 @@ const Stream = ({
 
   const quitScreenShare = () => {
     const normalVideo = streamsData.streams.find(
-      (stream) => stream._id === _id && stream.conversationId === conversationId
+      (stream) => stream._id === _id
     );
     streamRef.current.srcObject = normalVideo.stream;
-
-    const handlers = streamsData.callHandlers.filter(
-      (callHandler) => callHandler.conversationId === roomData.conversationId
-    );
+    dispatch({ type: "STOP_SCREEN_STREAM" });
+    const handlers = streamsData.callHandlers;
     if (handlers.length > 0) {
       handlers.forEach((handler) => {
         handler.call.peerConnection.getSenders().forEach((sender) => {
@@ -319,12 +310,7 @@ const Stream = ({
   return (
     <>
       <div className="video-player">
-        <video
-          className="w-[100%] max-h-[50vh]"
-          ref={streamRef}
-          autoPlay
-          controls
-        />
+        <video className="video-element" ref={streamRef} autoPlay controls />
 
         <div className="flex items-center h-[55px] bg-[#3A3A3A] px-[1rem]">
           <Avatar alt={username} src={image} sx={{ width: 30, height: 30 }}>

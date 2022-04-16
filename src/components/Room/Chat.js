@@ -160,9 +160,9 @@ function Chat({
 
   return (
     <div
-      className={`chat-bar relative z-[100] ${
+      className={` flex-[0.25] chat-bar relative z-[100] ${
         showMobileChat ? "show-mobile-chat" : "hide-mobile-chat"
-      }  flex-[0.25] bg-[#1F1F1F] h-full text-white flex flex-col`}
+      }  bg-[#1F1F1F] h-full text-white flex flex-col`}
     >
       <div
         className={`relative py-[1.5rem] border-b border-[rgba(255,255,255,0.2)] mb-[1rem] h-[9%] lg:h-[7%] ${
@@ -237,7 +237,7 @@ function Chat({
         </div>
       </div>
 
-      <div className="h-[50px] bg-[#1F1F1F] lg:h-[7%] border-t border-b border-[rgba(255,255,255,0.2)] w-full absolute bottom-0 left-0 md:static">
+      <div className="h-[50px] lg:h-[7%] border-t border-b border-[rgba(255,255,255,0.2)] w-full absolute bottom-0 left-0 md:static">
         <div className="relative h-full w-full flex items-center">
           {showEmoji && (
             <div
@@ -249,10 +249,10 @@ function Chat({
               <Picker onEmojiClick={handleEmojiClick} />
             </div>
           )}
-          <div className="h-full flex items-center px-[2rem]">
-            <div className="">
+          <div className="h-full w-full flex items-center px-[0rem] lg:px-[0rem]">
+            <div className="flex-[0.1] flex items-center justify-center h-full w-full">
               <GrEmoji
-                className={`${showEmoji && "text-[yellow]"}`}
+                className={` ${showEmoji && "text-[tomato]"}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowEmoji(true);
@@ -260,24 +260,28 @@ function Chat({
                 size={25}
               />
             </div>
-            <input
-              className="flex-1 flex flexwrap-wrap text-white outline-none border-none h-full bg-transparent pl-[1rem] pr-[0.6rem] mobile-input"
-              type="text"
-              placeholder="Type a message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.code === "Enter") {
-                  sendMessage();
-                }
-              }}
-            />
-
-            <IoMdSend
-              className="text-[25px] absolute right-[1rem]"
-              color="#1492E6 "
-              onClick={() => sendMessage()}
-            />
+            <div className="flex-[0.8] h-full w-full bg-[#1F1F1F]">
+              <textarea
+                style={{ scroll: "none" }}
+                className="text-white py-[0.8rem] lg:pt-[1.3rem] lg:pb-[0.8rem] resize-none px-[0.7rem] outline-none bg-transparent border-none h-full w-full"
+                type="text"
+                placeholder="Type a message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.code === "Enter") {
+                    sendMessage();
+                  }
+                }}
+              />
+            </div>
+            <div className="flex-[0.1] h-full w-full flex items-center justify-center">
+              <IoMdSend
+                className="text-[25px]"
+                color="#1492E6 "
+                onClick={() => sendMessage()}
+              />
+            </div>
           </div>
         </div>
       </div>

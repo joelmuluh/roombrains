@@ -2,8 +2,6 @@ const initialState = {
   peer: null,
   intended_room: null,
   blocked_info: null,
-  coders: [],
-  whiteboarders: [],
 };
 
 export const meetingReducer = (state = initialState, action) => {

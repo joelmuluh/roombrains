@@ -2,7 +2,6 @@ import { AiOutlineHome } from "react-icons/ai";
 import { HiCode } from "react-icons/hi";
 import { VscEditorLayout } from "react-icons/vsc";
 import { BiMessageRoundedEdit } from "react-icons/bi";
-import { GrUndo } from "react-icons/gr";
 
 export const links = [
   {
@@ -29,10 +28,5 @@ export const links = [
       />
     ),
     url: "about",
-  },
-  {
-    text: "Excuse me",
-    icon: <GrUndo className="text-[18px] lg:text-[25px]" />,
-    url: "/profile",
   },
 ];
