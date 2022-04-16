@@ -179,6 +179,7 @@ const Stream = ({
         _id,
       },
     });
+    dispatch({ type: "STOP_SCREEN_STREAM" });
     if (roomData.creator === _id) {
       dispatch({
         type: "STOP_STREAMING",
