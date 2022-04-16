@@ -41,6 +41,7 @@ function Settings() {
   const [description, setDescription] = useState(roomData?.description);
   const [selectedOption, setSelectedOption] = useState("More functions");
   const [showBlockedPopup, setShowBlockedPopup] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const blockedUsers = useSelector((state) => state.myRooms.blockedUsers);
   const blocked_users_id = useSelector(
     (state) => state.myRooms.blocked_users_id
@@ -98,6 +99,7 @@ function Settings() {
   };
 
   const deleteRoom = async () => {
+    setDeleting(false);
     try {
       const response = await axios.delete(
         `${process.env.REACT_APP_API}/room/${roomData._id}`,
@@ -107,6 +109,7 @@ function Settings() {
           },
         }
       );
+      setDeleting(false);
       if (response.data.success) {
         dispatch({ type: "DELETE_ROOM", payload: roomData._id });
         setAlertMessage("Room successfully deleted");

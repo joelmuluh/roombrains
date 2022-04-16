@@ -1,8 +1,10 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function DeleteRoom({ setShowDeletePopup, deleteRoom }) {
   const user = useSelector((state) => state.user);
+  const navigate = useNavigate();
   const firstName = user.username.includes(" ")
     ? user.username.split(" ")[1]
     : user.username;
@@ -24,8 +26,10 @@ function DeleteRoom({ setShowDeletePopup, deleteRoom }) {
             <button
               onClick={() => {
                 setShowDeletePopup(false);
-
                 deleteRoom();
+                setTimeout(() => {
+                  navigate("/profile");
+                }, 2000);
               }}
               className="border-none bg-red-500 text-white w-[100px] h-[40px]"
             >
