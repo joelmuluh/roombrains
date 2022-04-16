@@ -413,29 +413,34 @@ const Stream = ({
                     </div>
                   )}
 
-                  {_id === user._id && window.innerWidth > 800 && (
+                  {_id === user._id && (
                     <>
-                      {!sharingScreen ? (
-                        <div
-                          onClick={() => shareScreen()}
-                          className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
-                        >
-                          <BsShareFill className="text-20px" />
-                          <p className="text-[14px] cursor-pointer">
-                            share screen
-                          </p>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={() => quitScreenShare()}
-                          className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
-                        >
-                          <BsShareFill className="text-20px" />
-                          <p className="text-[14px] cursor-pointer">
-                            Stop ScreenShare
-                          </p>
-                        </div>
+                      {window.innerWidth > 800 && (
+                        <>
+                          {!sharingScreen ? (
+                            <div
+                              onClick={() => shareScreen()}
+                              className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
+                            >
+                              <BsShareFill className="text-20px" />
+                              <p className="text-[14px] cursor-pointer">
+                                share screen
+                              </p>
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() => quitScreenShare()}
+                              className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
+                            >
+                              <BsShareFill className="text-20px" />
+                              <p className="text-[14px] cursor-pointer">
+                                Stop ScreenShare
+                              </p>
+                            </div>
+                          )}
+                        </>
                       )}
+
                       <div
                         onClick={() => leaveChat()}
                         className=" lg:mb-[1rem] px-[1rem] py-[0.6rem] lg:py-[0.8rem] bg-gray-200 rounded-[6px] flex space-x-[1rem] items-center hover:bg-gray-300 transition duration-200 cursor-pointer"
