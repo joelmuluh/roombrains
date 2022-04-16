@@ -1,9 +1,17 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-function DeleteRoom({ setShowDeletePopup, deleteRoom }) {
+function DeleteRoom({
+  setShowDeletePopup,
+  deleteRoom,
+  roomData,
+  setAlertMessage,
+  setShowAlert,
+}) {
   const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const socket = useSelector((state) => state.streams.socket);
   const navigate = useNavigate();
   const firstName = user.username.includes(" ")
     ? user.username.split(" ")[1]
@@ -17,7 +25,7 @@ function DeleteRoom({ setShowDeletePopup, deleteRoom }) {
           <p className="text-[14px] lg:text-[16px]">
             {firstName}, If you delete this room, all Chats and Data related to
             this room will be gone. Also, any current participant of this room
-            will lose access immediately.
+            will lose access.
           </p>
           <p className="my-[1rem] text-[14px] lg:text-[16px]">
             Are you still willing to proceed?
@@ -27,6 +35,14 @@ function DeleteRoom({ setShowDeletePopup, deleteRoom }) {
               onClick={() => {
                 setShowDeletePopup(false);
                 deleteRoom();
+                dispatch({
+                  type: "RESET_STATE",
+                });
+                socket.emit("admin_deleted_this_room", {
+                  conversationId: roomData.conversationId,
+                  _id: user._id,
+                });
+
                 setTimeout(() => {
                   navigate("/profile");
                 }, 2000);

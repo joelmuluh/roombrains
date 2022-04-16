@@ -262,8 +262,8 @@ function Chat({
             </div>
             <div className="flex-[0.8] h-full w-full bg-[#1F1F1F]">
               <textarea
-                style={{ scroll: "none" }}
-                className="text-white py-[0.8rem] lg:pt-[1.3rem] lg:pb-[0.8rem] resize-none px-[0.7rem] outline-none bg-transparent border-none h-full w-full"
+                style={{ resize: "none" }}
+                className="remove-scrollbar text-white py-[0.8rem] lg:pt-[1.3rem] lg:pb-[0.8rem] resize-none px-[0.7rem] outline-none bg-transparent border-none h-full w-full"
                 type="text"
                 placeholder="Type a message"
                 value={message}

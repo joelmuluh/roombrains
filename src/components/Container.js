@@ -144,6 +144,29 @@ function Container({ setShowMobileChat, roomData }) {
         }, 4000);
       }
     });
+    socket
+      .off("admin_deleted_this_room")
+      .on("admin_deleted_this_room", (data) => {
+        setAlertMessage(`${firstName}, the admin just deleted this room`);
+        setShowAlert(true);
+        dispatch({
+          type: "REMOVE_STREAM",
+          payload: {
+            _id: data._id,
+          },
+        });
+        setTimeout(() => {
+          setAlertMessage("The room will be shut down in 20 seconds from now");
+          setShowAlert(true);
+        }, 5000);
+
+        setTimeout(() => {
+          dispatch({
+            type: "RESET_STATE",
+          });
+          navigate("/profile");
+        }, 20000);
+      });
   }, []);
 
   socket

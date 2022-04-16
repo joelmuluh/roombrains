@@ -110,13 +110,13 @@ function Settings() {
         }
       );
       setDeleting(false);
-      if (response.data.success) {
-        dispatch({ type: "DELETE_ROOM", payload: roomData._id });
-        setAlertMessage("Room successfully deleted");
-        showAlert(true);
-        navigate("/profile");
-      }
-    } catch (error) {}
+
+      dispatch({ type: "DELETE_ROOM", payload: roomData._id });
+      setAlertMessage("Room successfully deleted");
+      showAlert(true);
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   const changeOption = (e) => {
@@ -183,6 +183,9 @@ function Settings() {
         <DeleteRoom
           deleteRoom={deleteRoom}
           setShowDeletePopup={setShowDeletePopup}
+          roomData={roomData}
+          setAlertMessage={setAlertMessage}
+          setShowAlert={setShowAlert}
         />
       )}
       {showBlockedPopup && (
