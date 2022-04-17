@@ -265,9 +265,13 @@ function Container({ setShowMobileChat, roomData }) {
         _id: data._id,
       },
     });
+
     if (data._id === user._id) {
       setAlertMessage(`${data.username}, the Admin just removed you`);
       setShowAlert(true);
+      dispatch({
+        type: "STOP_SCREEN_STREAM",
+      });
     } else {
       setAlertMessage(`The admin just removed ${data.username}`);
       setShowAlert(true);
