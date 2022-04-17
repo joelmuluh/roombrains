@@ -121,6 +121,11 @@ function Register() {
                 }}
                 spellCheck={false}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => {
+                  if (!validator.isEmail(email) && email.length !== 0) {
+                    setEmailValid(false);
+                  }
+                }}
                 value={email}
                 type="text"
                 className="bg-[#373333] h-[50px] outline-none border-none px-[1rem] text-white"

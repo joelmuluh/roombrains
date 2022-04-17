@@ -123,7 +123,7 @@ function Login() {
                   setAccountExists(true);
                 }}
                 onBlur={() => {
-                  if (!validator.isEmail(email)) {
+                  if (!validator.isEmail(email) && email.length !== 0) {
                     setEmailValid(false);
                   }
                 }}
