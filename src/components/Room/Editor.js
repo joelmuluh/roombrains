@@ -179,7 +179,7 @@ function Editor() {
             </div>
           </div>
         </div>
-        <div className="h-full w-full mt-[1rem]">
+        <div className="h-full w-full lg:mt-[0.3rem]">
           <AceEditor
             mode={language}
             theme="dracula"
@@ -193,9 +193,9 @@ function Editor() {
               wrap: true,
             }}
             value={code}
-            className={`editor ${
+            className={`${
               output ? "editor-60" : "editor-70"
-            } lg:editor-80 transition duration-200`}
+            } lg:editor-80 transition duration-200 `}
             readOnly={false}
           />
           <div
