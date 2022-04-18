@@ -122,11 +122,6 @@ function Login() {
                   setEmailValid(true);
                   setAccountExists(true);
                 }}
-                onBlur={() => {
-                  if (!validator.isEmail(email) && email.length !== 0) {
-                    setEmailValid(false);
-                  }
-                }}
                 onChange={(e) => setEmail(e.target.value)}
                 value={email}
                 type="text"
