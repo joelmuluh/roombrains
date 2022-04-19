@@ -30,7 +30,8 @@ function Register() {
       }
       if (validator.isEmail(email)) {
         setEmailValid(true);
-      } else {
+      }
+      if (!validator.isEmail(email)) {
         setEmailValid(false);
       }
       if (password === confirmPassword && validator.isEmail(email)) {
@@ -50,7 +51,6 @@ function Register() {
             setAccountExists(true);
           } else {
             navigate("/login");
-            console.log(data);
           }
         } catch (error) {
           console.log(error.message);
